@@ -53,7 +53,7 @@ export default function HeroSection() {
     const [openDropdown, setOpenDropdown] = useState<number | null>(null);
 
     const toggleDropdown = (id: number) => {
-        setOpenDropdown(openDropdown === id ? null : id);
+  setOpenDropdown(openDropdown === id ? null : id);
         setActiveFeature(id - 1);
     };
 

@@ -21,6 +21,12 @@ interface Blog {
 
 const AVAILABLE_TAGS = ["Tech", "SaaS", "Fashion", "Lifestyle", "Business", "Health", "Travel", "Food"];
 
+// Strip HTML tags -> plain text (for card previews / meta descriptions only)
+const stripHtml = (html: string): string => {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+};
+
 export default function BlogsPage() { 
   const [blogs, setBlogs] = useState<Blog[]>([]); 
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]); 
@@ -317,7 +323,7 @@ export default function BlogsPage() {
         "blogPost": filteredBlogs.slice(0, 10).map(blog => ({
           "@type": "BlogPosting",
           "headline": blog.title,
-          "description": blog.metaDescription || (blog.content ? blog.content.substring(0, 150) + "..." : ""),
+          "description": blog.metaDescription || (blog.content ? stripHtml(blog.content).substring(0, 150) + "..." : ""),
           "image": blog.imageUrl,
           "datePublished": blog.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
           "dateModified": blog.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
@@ -524,9 +530,9 @@ export default function BlogsPage() {
                             {blog.title}
                           </h2>
                           
-                          {/* Content preview */}
+                          {/* Content preview - plain text, tags stripped */}
                           <p className="text-gray-400 text-base md:text-lg leading-relaxed line-clamp-3 font-normal">
-                            {blog.content ? blog.content.substring(0, 200) : ''}...
+                            {blog.content ? stripHtml(blog.content).substring(0, 200) : ''}...
                           </p>
 
                           {/* Blog tags */}

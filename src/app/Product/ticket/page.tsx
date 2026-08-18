@@ -455,16 +455,16 @@ export default function TicketPage() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="https://upsolvix.com/"
-              className="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 px-8 py-4 rounded-full text-lg font-medium shadow-lg shadow-purple-600/30 transition-all duration-300 hover:scale-105 w-full sm:w-auto justify-center"
+              className="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 px-8 py-4 rounded text-lg font-medium shadow-lg shadow-purple-600/30 transition-all duration-300 hover:scale-105 w-full sm:w-auto justify-center"
               aria-label="Go to landing page"
             >
-              Go to Home
+          Get More Dettils
               <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
 
             <a
               href="#how-it-works"
-              className="inline-flex items-center gap-3 border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 px-8 py-4 rounded-full text-lg backdrop-blur-md transition-all duration-300 w-full sm:w-auto justify-center"
+              className="inline-flex items-center gap-3 border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 px-8 py-4 rounded text-lg backdrop-blur-md transition-all duration-300 w-full sm:w-auto justify-center"
               aria-label="Read more about how it works"
             >
               Read More
