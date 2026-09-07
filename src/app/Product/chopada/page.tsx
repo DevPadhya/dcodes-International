@@ -340,7 +340,7 @@ const ChopadaLanding = () => {
                     <div className="text-4xl font-normal text-blue-400 mb-2">500+</div>
                     <div className="text-xs text-gray-500 tracking-widest">FAMILIES</div>
                   </div>
-                  <div className="text-center border-r border-gray-900">
+                   <div className="text-center border-r border-gray-900">
                     <div className="text-4xl font-normal text-blue-400 mb-2">10K+</div>
                     <div className="text-xs text-gray-500 tracking-widest">PUJAS</div>
                   </div>

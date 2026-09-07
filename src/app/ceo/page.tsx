@@ -159,7 +159,7 @@ export default function DevPadhyaPage() {
   // ==================== SEO META TAGS ====================
   useEffect(() => {
     // Update document title
-    document.title = "Dev Padhya | Founder & CEO of Dcodes Technologies | Digital Transformation Leader";
+    document.title = "Dev Padhya | Founder & CEO of Dcodes Technologies ";
     
     // Meta Description
     let metaDescription = document.querySelector('meta[name="description"]');
@@ -168,7 +168,7 @@ export default function DevPadhyaPage() {
       metaDescription.setAttribute('name', 'description');
       document.head.appendChild(metaDescription);
     }
-    metaDescription.setAttribute('content', "Dev Padhya is the Founder & CEO of Dcodes Technologies, a leading digital transformation company. Learn about his journey, vision, and how he's helping businesses grow through technology and innovation.");
+    metaDescription.setAttribute('content', "Dev Padhya, Founder & CEO of Dcodes Technologies, is helping businesses grow through innovative technology, digital transformation & bold vision for the future.");
     
     // Meta Keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');

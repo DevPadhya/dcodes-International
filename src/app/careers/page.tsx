@@ -533,9 +533,28 @@ export default function CareersPage() {
             source: "careers-page"
           });
           
-          setUploadProgress(100);
+          setUploadProgress(80);
           console.log("✅ Saved to Firestore, ID:", docRef.id);
-          
+
+          // Trigger acknowledgment + admin notification emails
+          // (Firestore save already succeeded — email failure should not block success UI)
+          try {
+            await fetch("/api/apply", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: formData.name.trim(),
+                email: formData.email.trim(),
+                phone: formData.phone.trim(),
+                position: formData.role.trim() || selectedJob?.title || "",
+                message: `Experience: ${formData.experience.trim() || "Not specified"}`,
+              }),
+            });
+          } catch (mailError) {
+            console.error("Mail trigger error:", mailError);
+          }
+
+          setUploadProgress(100);
           setSubmitSuccess(true);
           setMessage("✅ Application submitted successfully!");
           
@@ -1376,7 +1395,7 @@ export default function CareersPage() {
                       Cancel
                     </button>
                   </div>
-
+                  
                   <p className="text-center text-sm text-gray-500 pt-4">
                     By submitting this form, you agree to our privacy policy and consent to us contacting you about this position.
                   </p>
