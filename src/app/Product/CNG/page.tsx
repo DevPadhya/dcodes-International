@@ -130,6 +130,40 @@ const crmFeatures = [
     { icon: <TrendingUp className="w-5 h-5" />, text: "Sales Performance Analytics" }
 ];
 
+// ============== FAQ DATA ==============
+const faqs = [
+    {
+        id: 1,
+        question: "What is the Smart CNG Kit Renewal & Management System?",
+        answer: "It's an intelligent ERP solution built for CNG kit businesses to manage renewals, customers, inventory, sales, and service operations from a single dashboard."
+    },
+    {
+        id: 2,
+        question: "How does customer management work in this system?",
+        answer: "Every customer gets a 360° profile with contact details, service history, and communication logs, so your team always has full context before reaching out."
+    },
+    // {
+    //     id: 3,
+    //     question: "Can I track inventory and get low-stock alerts?",
+    //     answer: "Yes. Inventory Control gives you real-time stock levels, supplier tracking, and automated reordering alerts so you never run short on CNG kits."
+    // },
+    {
+        id: 4,
+        question: "Does the system support service and installation scheduling?",
+        answer: "Yes, you can schedule installations, track full service history, and assign technicians directly through the Service Management module."
+    },
+    {
+        id: 5,
+        question: "What kind of reports and analytics are available?",
+        answer: "You get one-click financial reports, sales performance metrics, and business insights through the Reporting & Analytics module."
+    },
+    {
+        id: 6,
+        question: "Is there a setup fee to get started?",
+        answer: "No setup fee — you can get started in minutes and only pay for what your business needs."
+    }
+];
+
 // ============== HERO TITLE COMPONENT ==============
 const HeroTitle = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -499,6 +533,75 @@ const CRMCard = () => {
     );
 };
 
+// ============== FAQ SECTION ==============
+const FAQSection = () => {
+    const [openId, setOpenId] = useState<number | null>(1);
+
+    return (
+        <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900">
+            <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                    <div className="inline-flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full mb-4">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
+                        <span className="text-blue-400 font-light text-sm tracking-wide">FAQ</span>
+                    </div>
+
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-4 tracking-wide">
+                        Frequently Asked <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Questions</span>
+                    </h2>
+
+                    <p className="text-base text-gray-400 font-light max-w-2xl mx-auto tracking-wide">
+                        Everything you need to know about the Smart CNG Kit Renewal & Management System
+                    </p>
+                </div>
+
+                <div className="space-y-3">
+                    {faqs.map((faq) => {
+                        const isOpen = openId === faq.id;
+                        return (
+                            <div
+                                key={faq.id}
+                                className={`rounded-2xl border transition-all duration-300 ${
+                                    isOpen
+                                        ? 'border-blue-500 bg-gray-900/50 shadow-lg shadow-blue-500/10'
+                                        : 'border-gray-800 bg-gray-900/30 hover:bg-gray-900/50'
+                                }`}
+                            >
+                                <button
+                                    onClick={() => setOpenId(isOpen ? null : faq.id)}
+                                    className="w-full flex items-center justify-between gap-4 p-5 text-left"
+                                    aria-expanded={isOpen}
+                                    aria-controls={`faq-answer-${faq.id}`}
+                                >
+                                    <h3 className={`text-base md:text-lg font-light tracking-wide transition-colors ${isOpen ? 'text-blue-400' : 'text-white'}`}>
+                                        {faq.question}
+                                    </h3>
+                                    <span className="shrink-0 p-1 hover:bg-gray-800 rounded">
+                                        {isOpen ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </span>
+                                </button>
+
+                                <div
+                                    id={`faq-answer-${faq.id}`}
+                                    className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                                >
+                                    <p className="text-gray-400 text-sm md:text-base font-light leading-relaxed px-5 pb-5">
+                                        {faq.answer}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 // ============== MAIN CNG PAGE ==============
 export default function CNGPage() {
     useEffect(() => {
@@ -534,6 +637,29 @@ export default function CNGPage() {
             document.head.appendChild(script);
         }
         script.textContent = JSON.stringify(structuredData);
+
+        // FAQ Structured Data
+        const structuredDataFaq = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqs.map((item) => ({
+                "@type": "Question",
+                "name": item.question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": item.answer
+                }
+            }))
+        };
+
+        let scriptFaq = document.querySelector('#structured-data-faq');
+        if (!scriptFaq) {
+            scriptFaq = document.createElement('script');
+            scriptFaq.id = 'structured-data-faq';
+            scriptFaq.setAttribute('type', 'application/ld+json');
+            document.head.appendChild(scriptFaq);
+        }
+        scriptFaq.textContent = JSON.stringify(structuredDataFaq);
     }, []);
 
     return (
@@ -542,6 +668,7 @@ export default function CNGPage() {
             <FeaturesSection />
             <InteractiveModules />
             <CRMCard />
+            <FAQSection />
         </div>
     );
 }

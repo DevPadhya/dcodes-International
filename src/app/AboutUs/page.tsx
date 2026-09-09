@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import DarkVeil from "@/components/ReactBit/DarkVeil";
 import { ThreeDMarquee } from "@/components/ui/3d-marquee";
-import { ChevronDown, Target, Eye, Users, ExternalLink, Globe, ArrowRight } from 'lucide-react';
+import { ChevronDown, Target, Eye, Users, ExternalLink, Globe, ArrowRight, HelpCircle, Plus, Minus } from 'lucide-react';
 
 const AboutUsPage = () => {
   const [expandedSection, setExpandedSection] = useState(null);
+  const [openFaq, setOpenFaq] = useState(null);
 
   // Animated Stat Component
   function AnimatedStat({ value }) {
@@ -277,6 +278,58 @@ const AboutUsPage = () => {
   const toggleSection = (index) => {
     setExpandedSection(expandedSection === index ? null : index);
   };
+
+  // FAQ Data
+  const faqs = [
+    {
+      q: "What services does Dcodes Technologies offer?",
+      a: "Dcodes Technologies offers a comprehensive range of IT services including Website Development, Software & Web ERP Solutions, Mobile App Development (Android & iOS), Digital Marketing, and SEO services. We provide end-to-end solutions from ideation to deployment and maintenance."
+    },
+    {
+      q: "What industries do you serve?",
+      a: "We serve a wide range of industries including Fintech & Insurance, Education, Energy and Utilities, Healthcare, Media & Entertainment, Oil & Gas, Retail & Ecommerce, Logistics & Distribution, Travel & Hospitality, Public Sector, Real Estate, Manufacturing, Financial Services, and Food & Beverage."
+    },
+    {
+      q: "Where is Dcodes Technologies headquartered?",
+      a: "Dcodes Technologies is headquartered in Gujarat, India. We serve clients globally with a strong presence across multiple countries and continents."
+    },
+    {
+      q: "How long has Dcodes Technologies been in business?",
+      a: "Dcodes Technologies was founded in early 2019. Since then, we have successfully delivered over 500 projects for clients ranging from startups to enterprise-level organizations."
+    },
+    {
+      q: "What technologies do you specialize in?",
+      a: "We specialize in modern technologies including React & Next.js, Laravel & PHP, WordPress, MERN Stack, Flutter, React Native, and custom software development. Our team stays up-to-date with the latest tech trends to deliver cutting-edge solutions."
+    },
+    {
+      q: "Do you offer custom software development?",
+      a: "Yes, we specialize in custom software and Web ERP solutions tailored to specific business requirements. We work closely with clients to understand their needs and deliver scalable, secure, and high-performance solutions."
+    },
+    {
+      q: "What is your project delivery process?",
+      a: "Our process includes: 1) Requirement gathering and analysis, 2) Planning and strategy, 3) Design and prototyping, 4) Development and testing, 5) Deployment and launch, and 6) Ongoing maintenance and support. We follow agile methodologies for transparency and flexibility."
+    },
+    {
+      q: "Do you provide post-launch support?",
+      a: "Absolutely! We provide comprehensive post-launch support including bug fixes, performance optimization, security updates, and feature enhancements. We offer various maintenance plans to suit different business needs."
+    },
+    {
+      q: "How can I contact Dcodes Technologies?",
+      a: "You can reach us via email at info@dcodestech.com or by phone at +91 6353 653 977. You can also fill out the contact form on our website, and our team will get back to you within 24 hours."
+    },
+    {
+      q: "Do you work with international clients?",
+      a: "Yes, we work with clients worldwide. Our team has experience delivering projects for clients across multiple continents and time zones. We have a flexible approach to accommodate different cultural and business requirements."
+    },
+    {
+      q: "What makes Dcodes Technologies different from other IT companies?",
+      a: "What sets us apart is our client-first approach, innovative thinking, and commitment to quality. We don't just build solutions — we create digital ecosystems that connect businesses to customers, data to strategy, and vision to execution. Our team combines creativity, technology, and strategy to deliver measurable business impact."
+    },
+    {
+      q: "Do you provide digital marketing services?",
+      a: "Yes, we offer comprehensive digital marketing services including SEO Strategy, Social Media Marketing, Content Marketing, Performance Analytics, and complete online presence management to help businesses grow their digital footprint."
+    },
+  ];
 
   // Data from both components
   const interactiveSections = [
@@ -868,6 +921,76 @@ const AboutUsPage = () => {
               <h3 className="absolute top-4 left-4 text-white font-semibold text-lg drop-shadow-md">
                 Ideation & Collaboration
               </h3>
+            </div>
+          </div>
+        </section>
+
+        {/* ============ FAQ SECTION - NEWLY ADDED ============ */}
+        <section className="w-full py-16 border-t border-white/10">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm mb-6">
+                <HelpCircle className="w-4 h-4 text-blue-400" />
+                <span className="text-xs uppercase tracking-widest text-white/60">FAQ</span>
+              </div>
+              <h2 className="text-4xl font-normal mb-4 tracking-wide">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-white/50 text-lg">
+                Everything you need to know about Dcodes Technologies and our services.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, i) => {
+                const isOpen = openFaq === i;
+                return (
+                  <div
+                    key={i}
+                    className="bg-gray-900/40 border border-white/10 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300"
+                  >
+                    <button
+                      onClick={() => setOpenFaq(isOpen ? null : i)}
+                      className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+                      aria-expanded={isOpen}
+                    >
+                      <span className="font-medium text-white text-base md:text-lg">
+                        {faq.q}
+                      </span>
+                      <span
+                        className={`text-blue-400 text-2xl leading-none transition-transform duration-300 flex-shrink-0 ${
+                          isOpen ? "rotate-45" : ""
+                        }`}
+                      >
+                        +
+                      </span>
+                    </button>
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                      }`}
+                    >
+                      <p className="px-6 pb-5 text-white/70 text-base leading-relaxed">
+                        {faq.a}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Still have questions CTA */}
+            <div className="mt-12 text-center">
+              <p className="text-white/50 mb-6">
+                Still have questions? We're here to help!
+              </p>
+              <Link
+                href="/connect"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 px-8 py-3 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105"
+              >
+                Contact Us
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </section>

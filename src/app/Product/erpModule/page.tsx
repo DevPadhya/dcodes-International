@@ -36,6 +36,7 @@ import {
 
 const PremiumERPProducts = () => {
   const [activeModule, setActiveModule] = useState(null);
+  const [activeFaq, setActiveFaq] = useState(null);
 
   // SEO Meta Tags - Adding dynamically with useEffect
   useEffect(() => {
@@ -345,6 +346,29 @@ const PremiumERPProducts = () => {
       document.head.appendChild(scriptOrg);
     }
     scriptOrg.textContent = JSON.stringify(structuredDataOrg);
+
+    // FAQ Structured Data
+    const structuredDataFaq = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((item) => ({
+        "@type": "Question",
+        "name": item.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.answer
+        }
+      }))
+    };
+
+    let scriptFaq = document.querySelector('#structured-data-faq');
+    if (!scriptFaq) {
+      scriptFaq = document.createElement('script');
+      scriptFaq.id = 'structured-data-faq';
+      scriptFaq.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(scriptFaq);
+    }
+    scriptFaq.textContent = JSON.stringify(structuredDataFaq);
     
   }, []);
 
@@ -502,6 +526,33 @@ const PremiumERPProducts = () => {
     { title: 'API Integration', icon: Link, desc: 'Seamlessly connect with third-party apps and platforms.' },
     { title: 'Advanced Security & Compliance', icon: Shield, desc: 'Multi-layer encryption and user-role control.' },
     { title: 'Performance Optimized', icon: Zap, desc: 'Optimized architecture for instant processing speed.' }
+  ];
+
+  const faqs = [
+    {
+      question: "What is included in the Dcodes ERP Suite?",
+      answer: "The suite includes 14+ integrated modules covering CRM, Accounting, HR, Store, Purchase, Production, Quality Control, Sales, Service, Reception, and AI Insights, all on one unified cloud platform."
+    },
+    {
+      question: "Can the ERP be customized for my industry?",
+      answer: "Yes. The modules are fully customizable and have been deployed across Manufacturing, Retail, Healthcare, Finance, Real Estate, and SaaS/IT industries."
+    },
+    {
+      question: "Is the ERP cloud-based or do I need on-premise servers?",
+      answer: "It's 100% cloud-based with a scalable architecture, so you can access it from the web, mobile, or desktop without managing your own servers."
+    },
+    {
+      question: "How long does implementation typically take?",
+      answer: "Deployment is designed to be rapid thanks to pre-built modules — exact timelines depend on how many modules and integrations you need, which our sales team can scope with you."
+    },
+    {
+      question: "What kind of support is available after go-live?",
+      answer: "We provide 24/7 expert support with an SLA-backed uptime guarantee, along with ongoing maintenance."
+    },
+    {
+      question: "Does the ERP integrate with other tools we already use?",
+      answer: "Yes, API integration lets the ERP connect seamlessly with third-party apps and platforms you're already running."
+    }
   ];
 
   return (
@@ -845,6 +896,57 @@ const PremiumERPProducts = () => {
               <h3 className="text-xl font-normal text-white mb-3">Desktop</h3>
               <p className="text-gray-400 font-normal">Cross-platform desktop apps</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 px-6 border-t border-gray-800">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-normal mb-6 text-white">Frequently Asked Questions</h2>
+            <p className="text-xl text-gray-400 font-normal">Answers to common questions about our ERP suite</p>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => {
+              const isActive = activeFaq === index;
+              return (
+                <motion.div
+                  key={index}
+                  className={`border border-gray-800 rounded-xl overflow-hidden transition-all duration-500 hover:border-gray-600 ${isActive ? 'border-white/30 bg-white/5' : ''
+                    }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  viewport={{ once: true }}
+                >
+                  <button
+                    className="w-full flex items-center justify-between gap-4 p-6 text-left"
+                    onClick={() => setActiveFaq(isActive ? null : index)}
+                    aria-expanded={isActive}
+                    aria-controls={`faq-answer-${index}`}
+                  >
+                    <h3 className="text-lg font-medium text-white">{faq.question}</h3>
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-300 ${isActive ? 'rotate-180 text-white' : ''
+                        }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  <div
+                    id={`faq-answer-${index}`}
+                    className={`overflow-hidden transition-all duration-500 ${isActive ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                      }`}
+                  >
+                    <p className="text-gray-400 text-sm leading-relaxed px-6 pb-6">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
