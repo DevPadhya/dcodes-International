@@ -305,30 +305,8 @@ const AboutUsPage = () => {
       q: "Do you offer custom software development?",
       a: "Yes, we specialize in custom software and Web ERP solutions tailored to specific business requirements. We work closely with clients to understand their needs and deliver scalable, secure, and high-performance solutions."
     },
-    {
-      q: "What is your project delivery process?",
-      a: "Our process includes: 1) Requirement gathering and analysis, 2) Planning and strategy, 3) Design and prototyping, 4) Development and testing, 5) Deployment and launch, and 6) Ongoing maintenance and support. We follow agile methodologies for transparency and flexibility."
-    },
-    {
-      q: "Do you provide post-launch support?",
-      a: "Absolutely! We provide comprehensive post-launch support including bug fixes, performance optimization, security updates, and feature enhancements. We offer various maintenance plans to suit different business needs."
-    },
-    {
-      q: "How can I contact Dcodes Technologies?",
-      a: "You can reach us via email at info@dcodestech.com or by phone at +91 6353 653 977. You can also fill out the contact form on our website, and our team will get back to you within 24 hours."
-    },
-    {
-      q: "Do you work with international clients?",
-      a: "Yes, we work with clients worldwide. Our team has experience delivering projects for clients across multiple continents and time zones. We have a flexible approach to accommodate different cultural and business requirements."
-    },
-    {
-      q: "What makes Dcodes Technologies different from other IT companies?",
-      a: "What sets us apart is our client-first approach, innovative thinking, and commitment to quality. We don't just build solutions — we create digital ecosystems that connect businesses to customers, data to strategy, and vision to execution. Our team combines creativity, technology, and strategy to deliver measurable business impact."
-    },
-    {
-      q: "Do you provide digital marketing services?",
-      a: "Yes, we offer comprehensive digital marketing services including SEO Strategy, Social Media Marketing, Content Marketing, Performance Analytics, and complete online presence management to help businesses grow their digital footprint."
-    },
+  
+ 
   ];
 
   // Data from both components
