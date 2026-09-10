@@ -804,7 +804,7 @@ export default function DcodesWebsiteDev() {
                   </Link>
 
                   <Link 
-                    href="/Portfolio" 
+                    href="https://portfolio.dcodestech.com/#Website%20Projects" 
                     className="group text-sm md:text-base tracking-wider uppercase text-gray-400 hover:text-white transition-all duration-300 px-6 sm:px-8 md:px-10 py-3 md:py-4 border border-gray-600 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/20 rounded-xl flex items-center justify-center min-w-[200px] sm:min-w-[220px] transform hover:-translate-y-1"
                     aria-label="View our web development portfolio"
                   >

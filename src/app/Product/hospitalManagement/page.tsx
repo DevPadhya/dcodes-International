@@ -65,7 +65,37 @@ const comparisonData = [
     { feature: 'Mobile Access', traditional: 'Limited or None', ourSolution: 'Full Mobile App Suite' },
 ];
 
+// faq data
+const faqData = [
+    {
+        question: "How long does it take to implement the Hospital ERP?",
+        answer: "Most deployments go live in 2-4 weeks, compared to the 3-6 months typical of traditional hospital systems."
+    },
+    {
+        question: "Is the system HIPAA and GDPR compliant?",
+        answer: "Yes. Data is protected with encryption and access controls, and the platform is built to meet HIPAA and GDPR requirements."
+    },
+    {
+        question: "Can it integrate with our existing EHR system?",
+        answer: "Yes, the platform offers seamless Electronic Health Records (EHR) integration so patient data stays unified across systems."
+    },
+    {
+        question: "How much training does our staff need?",
+        answer: "Training is minimal — around 10 hours on average, versus 40+ hours typically required for traditional hospital software."
+    },
+    {
+        question: "Does it handle pharmacy and billing as well as patient records?",
+        answer: "Yes. Beyond patient management and scheduling, it covers pharmacy and inventory tracking, automated billing, and insurance claims processing."
+    },
+    {
+        question: "What kind of support is available after go-live?",
+        answer: "All plans include 24/7 dedicated support, automatic zero-downtime updates, and cloud deployment."
+    }
+];
+
 export default function Hospital() {
+    const [openFaq, setOpenFaq] = useState(0);
+
     // SEO Meta Tags - Adding dynamically with useEffect
     useEffect(() => {
         // Update document title
@@ -336,6 +366,29 @@ export default function Hospital() {
             document.head.appendChild(scriptOrg);
         }
         scriptOrg.textContent = JSON.stringify(structuredDataOrg);
+
+        // FAQ Structured Data
+        const structuredDataFaq = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqData.map((item) => ({
+                "@type": "Question",
+                "name": item.question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": item.answer
+                }
+            }))
+        };
+
+        let scriptFaq = document.querySelector('#structured-data-faq');
+        if (!scriptFaq) {
+            scriptFaq = document.createElement('script');
+            scriptFaq.id = 'structured-data-faq';
+            scriptFaq.setAttribute('type', 'application/ld+json');
+            document.head.appendChild(scriptFaq);
+        }
+        scriptFaq.textContent = JSON.stringify(structuredDataFaq);
         
     }, []);
 
@@ -426,6 +479,57 @@ export default function Hospital() {
                     </div>
                     <div className="mt-12 text-center text-gray-400 text-sm">
                         <p>All plans include 24/7 support, automatic updates, and cloud deployment</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* FAQ Section */}
+            <div className="py-20 bg-black">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+                            Frequently Asked Questions
+                        </h2>
+                        <p className="text-lg text-gray-400 max-w-3xl mx-auto">
+                            Everything you need to know about our Hospital ERP solution
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {faqData.map((faq, index) => {
+                            const isOpen = openFaq === index;
+                            return (
+                                <div
+                                    key={index}
+                                    className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden"
+                                >
+                                    <button
+                                        onClick={() => setOpenFaq(isOpen ? null : index)}
+                                        className="w-full flex items-center justify-between gap-4 py-5 px-6 text-left"
+                                        aria-expanded={isOpen}
+                                        aria-controls={`hospital-faq-answer-${index}`}
+                                    >
+                                        <span className="text-white font-medium text-base sm:text-lg">
+                                            {faq.question}
+                                        </span>
+                                        <span
+                                            className={`shrink-0 text-2xl text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
+                                            aria-hidden="true"
+                                        >
+                                            +
+                                        </span>
+                                    </button>
+                                    <div
+                                        id={`hospital-faq-answer-${index}`}
+                                        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40' : 'max-h-0'}`}
+                                    >
+                                        <p className="text-gray-400 text-sm sm:text-base leading-relaxed px-6 pb-5">
+                                            {faq.answer}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

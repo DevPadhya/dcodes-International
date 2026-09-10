@@ -595,13 +595,16 @@ export default function PremiumERPSolutions() {
               >
                 <span className="relative z-10">Assess Your Needs</span>
               </Link>
-              <button 
-                className="text-sm tracking-wide uppercase text-gray-400 hover:text-white transition-all duration-300 relative group"
-                aria-label="Explore our complete ERP solutions portfolio"
-              >
-                Explore Solutions
-                <span className="absolute bottom-0 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
-              </button>
+              <Link 
+  href="https://portfolio.dcodestech.com/#ERPs"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-sm tracking-wide uppercase text-gray-400 hover:text-white transition-all duration-300 relative group"
+  aria-label="Explore our complete ERP solutions portfolio"
+>
+  Explore Solutions
+  <span className="absolute bottom-0 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
+</Link>
             </div>
           </div>
         </section>

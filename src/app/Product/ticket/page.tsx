@@ -34,7 +34,7 @@ export default function TicketPage() {
       metaDescription.setAttribute('name', 'description');
       document.head.appendChild(metaDescription);
     }
-    metaDescription.setAttribute('content', "Create support tickets for device repairs. 24/7 IT helpdesk system with instant ticket generation and real-time status updates for  laptops, Desk, and more.");
+    metaDescription.setAttribute('content', "Create support tickets for device repairs. 24/7 IT helpdesk system with instant ticket generation and real-time status updates for laptops, Desk, and more.");
     
     // Update or create keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');
@@ -375,22 +375,55 @@ export default function TicketPage() {
     { icon: <Star className="w-6 h-6" />, value: "4.8/5", label: "Customer Rating" },
   ];
 
+  // Updated FAQs with 10+ questions
   const faqs = [
     {
       q: "Do I need to install any app to raise a ticket?",
-      a: "No. Everything runs on WhatsApp — just send a message to our number and your ticket is created automatically.",
+      a: "No. Everything runs on WhatsApp — just send a message to our number and your ticket is created automatically. No additional app installation required.",
     },
     {
       q: "How will I know the status of my repair?",
-      a: "You'll get real-time updates directly on WhatsApp as your device moves through each repair stage.",
+      a: "You'll get real-time updates directly on WhatsApp as your device moves through each repair stage. We keep you informed at every step.",
     },
     {
       q: "Is my data safe?",
-      a: "Yes. We only collect what's needed to process your repair, and your information is never shared with third parties.",
+      a: "Yes. We only collect what's needed to process your repair, and your information is never shared with third parties. We follow strict data protection protocols.",
     },
     {
       q: "What if my device isn't listed?",
-      a: "Send us a message anyway with your device details — we support most electronics and will confirm if we can help.",
+      a: "Send us a message anyway with your device details — we support most electronics and will confirm if we can help. Our team is always ready to assist.",
+    },
+    {
+      q: "How long does a typical repair take?",
+      a: "Repair time varies depending on the issue and device. Simple fixes may take 1-2 hours, while complex hardware repairs may take 24-48 hours. We'll give you an estimated time when you raise the ticket.",
+    },
+    {
+      q: "Do you provide warranty on repairs?",
+      a: "Yes, we provide a 30-day warranty on all repairs. If the same issue recurs within the warranty period, we'll fix it free of charge.",
+    },
+    {
+      q: "Can I track my repair status online?",
+      a: "Yes, we'll provide you with a unique ticket ID. You can track your repair status through WhatsApp or our web portal using this ID.",
+    },
+    {
+      q: "What are your working hours?",
+      a: "Our support team is available 24/7 via WhatsApp for ticket creation. Repair services are available Monday to Saturday, 9:00 AM to 8:00 PM IST.",
+    },
+    {
+      q: "Do you offer doorstep pickup and delivery?",
+      a: "Yes, we offer convenient doorstep pickup and delivery services. Just mention your address when creating the ticket, and we'll arrange the pickup.",
+    },
+    {
+      q: "What payment methods do you accept?",
+      a: "We accept multiple payment methods including UPI, Google Pay, PhonePe, credit/debit cards, net banking, and cash on delivery.",
+    },
+    {
+      q: "Can I cancel or modify my repair request?",
+      a: "Yes, you can cancel or modify your repair request by sending a message on WhatsApp. For changes, please contact us within 2 hours of ticket creation.",
+    },
+    {
+      q: "Do you provide temporary devices while repairing?",
+      a: "Yes, we offer temporary replacement devices for specific cases. This service is subject to availability and prior arrangement.",
     },
   ];
 
@@ -458,7 +491,7 @@ export default function TicketPage() {
               className="group inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 px-8 py-4 rounded text-lg font-medium shadow-lg shadow-purple-600/30 transition-all duration-300 hover:scale-105 w-full sm:w-auto justify-center"
               aria-label="Go to landing page"
             >
-          Get More Dettils
+              Get More Details
               <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
 
@@ -574,7 +607,7 @@ export default function TicketPage() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ - UPDATED WITH MORE QUESTIONS */}
       <section className="max-w-3xl mx-auto px-6 py-20 border-t border-white/10">
         <h2 className="text-3xl text-center mb-4">Frequently Asked Questions</h2>
         <p className="text-white/50 text-center mb-12">
@@ -594,9 +627,9 @@ export default function TicketPage() {
                   className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-medium text-white">{faq.q}</span>
+                  <span className="font-medium text-white text-sm md:text-base">{faq.q}</span>
                   <span
-                    className={`text-blue-400 text-xl leading-none transition-transform duration-300 ${
+                    className={`text-blue-400 text-xl leading-none transition-transform duration-300 flex-shrink-0 ${
                       isOpen ? "rotate-45" : ""
                     }`}
                   >
@@ -605,7 +638,7 @@ export default function TicketPage() {
                 </button>
                 <div
                   className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                    isOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
                   }`}
                 >
                   <p className="px-6 pb-4 text-white/60 text-sm leading-relaxed">{faq.a}</p>

@@ -1,9 +1,38 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Prism from '@/components/ReactBit/Prism';
 
+const faqs = [
+  {
+    q: "What is Chopada App?",
+    a: "Chopada is a digital yajman management app built for Bhudev families to manage puja records, client relationships, and family lineage in one place."
+  },
+  {
+    q: "Is Chopada free to use?",
+    a: "Yes, Chopada is free to download and use for managing your puja records, client directory, and family tree."
+  },
+  {
+    q: "Can I track donations and financial records?",
+    a: "Yes. Chopada lets you monitor donations and expenses, generate reports, and keep automated tax documentation."
+  },
+  {
+    q: "Does Chopada support family lineage tracking?",
+    a: "Yes, you can build and maintain your complete family tree, including gotra and kuldevata details, to preserve your spiritual heritage."
+  },
+  {
+    q: "Which platforms is Chopada available on?",
+    a: "Chopada is available on both Android and iOS through the Google Play Store and Apple App Store."
+  },
+  {
+    q: "How do I manage my clients (yajmans) in the app?",
+    a: "You can maintain detailed client profiles with contact info, complete puja history, preferences, and send automated festival greetings."
+  }
+];
+
 const ChopadaLanding = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
   // SEO Meta Tags - Adding dynamically with useEffect
   useEffect(() => {
     // Update document title
@@ -278,6 +307,29 @@ const ChopadaLanding = () => {
       document.head.appendChild(scriptOrg);
     }
     scriptOrg.textContent = JSON.stringify(structuredDataOrg);
+
+    // FAQ Structured Data
+    const structuredDataFaq = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((item) => ({
+        "@type": "Question",
+        "name": item.q,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": item.a
+        }
+      }))
+    };
+
+    let scriptFaq = document.querySelector('#structured-data-faq');
+    if (!scriptFaq) {
+      scriptFaq = document.createElement('script');
+      scriptFaq.id = 'structured-data-faq';
+      scriptFaq.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(scriptFaq);
+    }
+    scriptFaq.textContent = JSON.stringify(structuredDataFaq);
     
   }, []);
 
@@ -340,7 +392,7 @@ const ChopadaLanding = () => {
                     <div className="text-4xl font-normal text-blue-400 mb-2">500+</div>
                     <div className="text-xs text-gray-500 tracking-widest">FAMILIES</div>
                   </div>
-                  <div className="text-center border-r border-gray-900">
+                   <div className="text-center border-r border-gray-900">
                     <div className="text-4xl font-normal text-blue-400 mb-2">10K+</div>
                     <div className="text-xs text-gray-500 tracking-widest">PUJAS</div>
                   </div>
@@ -508,6 +560,55 @@ const ChopadaLanding = () => {
                 className="max-w-full h-auto"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-32 border-t border-gray-900">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="text-xs text-gray-500 tracking-widest mb-6">FAQ</div>
+            <h2 className="text-5xl lg:text-6xl font-normal mb-6 leading-tight">
+              Frequently asked <span className="text-blue-400">questions</span>
+            </h2>
+            <p className="text-xl text-gray-400 font-normal leading-relaxed">
+              Everything you need to know about Chopada App
+            </p>
+          </div>
+
+          <div className="border-t border-gray-900">
+            {faqs.map((item, index) => {
+              const isOpen = openIndex === index;
+              return (
+                <div key={item.q} className="border-b border-gray-900">
+                  <button
+                    onClick={() => setOpenIndex(isOpen ? null : index)}
+                    className="w-full flex items-center justify-between gap-6 py-8 text-left"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${index}`}
+                  >
+                    <span className="text-xl lg:text-2xl font-normal">{item.q}</span>
+                    <span
+                      className={`shrink-0 text-blue-400 text-2xl font-normal transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
+                      aria-hidden="true"
+                    >
+                      +
+                    </span>
+                  </button>
+                  <div
+                    id={`faq-answer-${index}`}
+                    className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 pb-8' : 'grid-rows-[0fr] opacity-0'}`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="text-gray-400 font-normal leading-relaxed max-w-2xl">
+                        {item.a}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

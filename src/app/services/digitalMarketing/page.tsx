@@ -776,7 +776,7 @@ export default function DigitalMarketingSolutions() {
                 <span className="relative z-10">Start Your Campaign</span>
               </Link>
               <Link 
-                href={'/success-stories'} 
+                href="https://portfolio.dcodestech.com/#Social%20Media"
                 className="text-sm tracking-wide uppercase text-gray-400 hover:text-white transition-all duration-300 relative group"
               >
                 View Success Stories

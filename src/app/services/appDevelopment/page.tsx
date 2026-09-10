@@ -61,6 +61,7 @@ import {
   SiMongodb,
 } from 'react-icons/si';
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 // Tech Stack Logos Component
 const TechStack = () => {
@@ -432,7 +433,7 @@ const WhyChooseUs = () => {
   );
 };
 
-// Business Hiring Models Component (NEW)
+// Business Hiring Models Component
 const BusinessHiringModels = () => {
   const [activeModel, setActiveModel] = useState<'dedicated' | 'fixed'>('dedicated');
 
@@ -507,7 +508,6 @@ const BusinessHiringModels = () => {
       viewport={{ once: true }}
     >
       <div className="max-w-6xl mx-auto">
-        {/* Section Header */}
         <motion.div 
           className="text-center mb-16"
           initial={{ y: 50, opacity: 0 }}
@@ -526,7 +526,6 @@ const BusinessHiringModels = () => {
           </p>
         </motion.div>
 
-        {/* Model Selection Tabs */}
         <motion.div 
           className="flex flex-col sm:flex-row justify-center gap-4 mb-16"
           initial={{ y: 30, opacity: 0 }}
@@ -563,7 +562,6 @@ const BusinessHiringModels = () => {
           </motion.button>
         </motion.div>
 
-        {/* Model Content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeModel}
@@ -582,7 +580,6 @@ const BusinessHiringModels = () => {
                 className="group"
               >
                 <Card className="p-8 bg-gradient-to-br from-gray-900/40 to-gray-800/20 border border-gray-800/30 hover:border-cyan-500/40 transition-all duration-300 h-full">
-                  {/* Step Number */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <step.icon className="w-6 h-6 text-cyan-400" />
@@ -590,12 +587,10 @@ const BusinessHiringModels = () => {
                     <span className="text-4xl font-extralight text-gray-700">0{index + 1}</span>
                   </div>
                   
-                  {/* Title */}
                   <h3 className="text-xl font-semibold mb-6 text-white group-hover:text-cyan-300 transition-colors">
                     {step.title}
                   </h3>
                   
-                  {/* Steps List */}
                   <ul className="space-y-3">
                     {step.steps.map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
@@ -607,7 +602,6 @@ const BusinessHiringModels = () => {
                     ))}
                   </ul>
 
-                  {/* Decorative line */}
                   <motion.div 
                     className="h-px bg-gradient-to-r from-cyan-400 to-transparent mt-6"
                     initial={{ width: 0 }}
@@ -620,7 +614,6 @@ const BusinessHiringModels = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* CTA Button */}
         <motion.div 
           className="text-center mt-16"
           initial={{ opacity: 0, y: 30 }}
@@ -644,7 +637,7 @@ const BusinessHiringModels = () => {
   );
 };
 
-// Case Studies Component with Brahm and BSCC - ONGC
+// Case Studies Component with redirect to portfolio
 const CaseStudies = () => {
   const caseStudies = [
     {
@@ -654,8 +647,7 @@ const CaseStudies = () => {
       description: "With the increasing pollution around the globe, governments are advocating more usage of electric vehicles which increases infrastructural needs of charging stations. Dcodes assisted United Kingdom based electric vehicle charging station provider to develop a mobile app for users to locate charging stations, check real time charging progress and make payments.",
       icon: Zap,
       iconBg: "from-yellow-500/20 to-orange-500/20",
-      iconColor: "text-yellow-400",
-      link: "/case-studies/brahm"
+      iconColor: "text-yellow-400"
     },
     {
       title: "BSCC - ONGC",
@@ -664,8 +656,7 @@ const CaseStudies = () => {
       description: "A comprehensive enterprise solution for ONGC's Business Support and Coordination Center. This powerful platform streamlines operations, asset management, and real-time monitoring for one of India's largest oil and gas exploration companies, enabling efficient decision-making and operational excellence.",
       icon: Fuel,
       iconBg: "from-green-500/20 to-emerald-500/20",
-      iconColor: "text-green-400",
-      link: "/case-studies/bscc-ongc"
+      iconColor: "text-green-400"
     }
   ];
 
@@ -733,13 +724,14 @@ const CaseStudies = () => {
                       whileHover={{ x: 10 }}
                       className="inline-flex items-center"
                     >
-                      <Link 
-                        href={study.link}
-                        className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium transition-colors group/link"
+                      {/* FIXED: Using main portfolio URL with #Mobile anchor */}
+                      <button
+                        onClick={() => window.open('https://portfolio.dcodestech.com/#Mobile', '_blank')}
+                        className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium transition-colors group/link cursor-pointer"
                       >
                         VIEW CASE STUDY
                         <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                      </Link>
+                      </button>
                     </motion.div>
                   </div>
                   
@@ -771,16 +763,14 @@ const CaseStudies = () => {
           transition={{ delay: 0.5, duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <motion.button 
-            className="group bg-transparent border border-cyan-500/50 hover:border-cyan-400 text-white px-10 py-4 text-sm tracking-wide uppercase hover:bg-cyan-500/10 transition-all duration-500 font-medium rounded-sm"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+          {/* FIXED: Using main portfolio URL with #Mobile anchor */}
+          <button
+            onClick={() => window.open('https://portfolio.dcodestech.com/#Mobile', '_blank')}
+            className="group bg-transparent border border-cyan-500/50 hover:border-cyan-400 text-white px-10 py-4 text-sm tracking-wide uppercase hover:bg-cyan-500/10 transition-all duration-500 font-medium rounded-sm inline-flex items-center justify-center gap-2"
           >
-            <Link href="/case-studies" className="inline-flex items-center gap-2">
-              View All Case Studies
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.button>
+            View All Case Studies
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
         </motion.div>
       </div>
     </motion.section>
@@ -881,13 +871,14 @@ const UpdatedHero = () => {
           </motion.button>
           
           <motion.button 
+            onClick={() => window.open('https://portfolio.dcodestech.com/#Mobile', '_blank')}
             className="text-sm tracking-wide uppercase text-gray-400 hover:text-cyan-400 transition-all duration-300 relative group font-medium"
             whileHover={{ y: -2 }}
             aria-label="View mobile app development case studies"
           >
-            <Link href="/case-studies" className="relative z-10">
+            <span className="relative z-10">
               View Case Studies
-            </Link>
+            </span>
             <motion.span 
               className="absolute bottom-0 left-0 h-px bg-gradient-to-r from-cyan-400 to-blue-500"
               initial={{ width: 0 }}
@@ -1345,7 +1336,7 @@ export default function EnhancedPremiumAppDev() {
         <DevelopmentProcess />
         <WhyChooseUs />
         
-        {/* BUSINESS HIRING MODELS SECTION - ADDED HERE */}
+        {/* BUSINESS HIRING MODELS SECTION */}
         <BusinessHiringModels />
         
         <CaseStudies />
