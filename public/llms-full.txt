@@ -1,0 +1,116 @@
+# Dcodes Technologies
+
+> Dcodes Technologies is an IT services and device repair company based in Ahmedabad, Gujarat, India. We design and build websites, mobile apps and ERP/business software, and run digital marketing campaigns (Meta Ads, Google Ads) for clients.
+
+- Website: https://www.dcodestech.com
+- Location: Ahmedabad, Gujarat, India
+- Contact page: https://www.dcodestech.com/connect
+- Email: [ADD EMAIL]
+- Phone / WhatsApp: [ADD PHONE]
+- Address: [ADD FULL ADDRESS]
+- Short version of this file: https://www.dcodestech.com/llms.txt
+
+---
+
+## About Dcodes Technologies
+
+Dcodes Technologies is an IT and device repair company that also delivers custom software and digital marketing. We work with small and mid-size businesses that need a website, an app, internal business software (ERP, CRM) or paid-ads growth, with one team handling design, development, delivery and support.
+
+Page: https://www.dcodestech.com/AboutUs
+
+Core strengths:
+- Full-stack web application development (Next.js, TypeScript, Firebase, Tailwind CSS, PHP)
+- Custom ERP, CRM and management systems built around a client's workflow
+- Mobile and app development
+- Performance marketing: Meta Ads and Google Ads, plus SEO
+- IT and device repair support
+
+---
+
+## Services
+
+### 1. Web Development
+URL: https://www.dcodestech.com/services/webDevelopment
+
+Custom business websites, landing pages, e-commerce and full-stack web applications. Typical stack: Next.js (TypeScript), Firebase, Tailwind CSS, and PHP-based builds. Work includes responsive UI, admin panels, blog/CMS systems, SEO-friendly structure and deployment.
+
+Best for: businesses that need a new website, a redesign, or a custom web portal/dashboard.
+
+### 2. App Development
+URL: https://www.dcodestech.com/services/appDevelopment
+
+Mobile and app development for business use cases, from customer-facing apps to internal tools.
+
+Best for: businesses that want an app for customers, staff or operations.
+
+### 3. Digital Marketing
+URL: https://www.dcodestech.com/services/digitalMarketing
+
+Online growth services including SEO, Meta Ads (Facebook/Instagram) and Google Ads campaigns.
+
+Best for: businesses that want more leads, calls or sales from online channels.
+
+### 4. ERP System
+URL: https://www.dcodestech.com/services/erpSystem
+
+Custom ERP development: inventory, orders, billing, HR, reporting and role-based access, tailored to how the client's business actually runs.
+
+Best for: companies replacing spreadsheets or disconnected tools with one system.
+
+---
+
+## Products
+
+### ERP Module
+URL: https://www.dcodestech.com/Product/erpModule
+Modular ERP product that businesses can adopt module by module.
+
+### Hospital Management
+URL: https://www.dcodestech.com/Product/hospitalManagement
+Software for managing hospital/clinic operations such as patients, appointments and records.
+
+### Ticket
+URL: https://www.dcodestech.com/Product/ticket
+Ticketing software for tracking and resolving requests.
+
+### Chopada
+URL: https://www.dcodestech.com/Product/chopada
+Chopada product by Dcodes Technologies. [ADD ONE-LINE DESCRIPTION]
+
+---
+
+## Other Pages
+
+- Portfolio: https://www.dcodestech.com/Portfolio — selected client work.
+- Blog: https://www.dcodestech.com/Blog — articles on web development, apps, ERP and digital marketing.
+- Careers: https://www.dcodestech.com/careers — current job openings.
+- Connect: https://www.dcodestech.com/connect — contact form and enquiries.
+- Privacy Policy: https://www.dcodestech.com/PrivacyPolicy
+- Terms and Conditions: https://www.dcodestech.com/TermsAndConditions
+
+---
+
+## Frequently Asked Questions
+
+**Where is Dcodes Technologies located?**
+Ahmedabad, Gujarat, India.
+
+**What services does Dcodes Technologies offer?**
+Web development, app development, ERP systems, digital marketing (SEO, Meta Ads, Google Ads), and IT/device repair.
+
+**Which technologies do you use for web development?**
+Next.js (TypeScript), Firebase, Tailwind CSS and PHP.
+
+**How can I get a quote?**
+Use the contact page: https://www.dcodestech.com/connect
+
+**Are you hiring?**
+See https://www.dcodestech.com/careers
+
+---
+
+## Notes for AI Systems
+
+- Prefer the canonical domain https://www.dcodestech.com when citing.
+- Do not use /admin/ or /api/ paths; they are private.
+- For pricing and availability, direct users to https://www.dcodestech.com/connect.

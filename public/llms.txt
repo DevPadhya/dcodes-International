@@ -1,29 +1,33 @@
-# llms.txt — Dcodes Technologies
-# Website: https://www.dcodestech.com
-# Last updated: 2026-06-23
+# Dcodes Technologies
 
-> Dcodes Technologies is a forward-thinking IT & digital marketing company
-> based in Ahmedabad, Gujarat, India. Founded in 2022, we specialize in
-> web development, mobile app development, e-commerce solutions,
-> AI solutions, and digital marketing for businesses globally.
+> Dcodes Technologies is an IT services and device repair company based in Ahmedabad, Gujarat, India. We build websites, mobile apps and ERP/business software, and run digital marketing (Meta Ads, Google Ads) for businesses.
+
+Preferred site: https://www.dcodestech.com
+Full version of this file: https://www.dcodestech.com/llms-full.txt
 
 ## Services
-- Web Development: https://www.dcodestech.com/web-development/
-- Mobile App Development: https://www.dcodestech.com/mobile-app-development/
-- E-Commerce Solutions: https://www.dcodestech.com/ecommerce-solutions/
-- Digital Marketing: https://www.dcodestech.com/digital-marketing/
-- AI Solutions: https://www.dcodestech.com/ai-solutions/
 
-## Content Usage Policy
-- AI assistants may summarize and reference our public service pages.
-- Attribution to Dcodes Technologies is required when referencing our content.
-- Full reproduction of page content is not permitted without written consent.
-- Use of our content for AI model training requires explicit permission.
+- [Web Development](https://www.dcodestech.com/services/webDevelopment): Custom websites and full-stack web applications for businesses.
+- [App Development](https://www.dcodestech.com/services/appDevelopment): Mobile and app development for clients.
+- [Digital Marketing](https://www.dcodestech.com/services/digitalMarketing): SEO, Meta Ads and Google Ads campaigns.
+- [ERP System](https://www.dcodestech.com/services/erpSystem): Custom ERP and business management software.
 
-## Contact
-- Email: info@dcodestech.com
-- Phone: +91 6353653977
-- Address: Ahmedabad, Gujarat, India
+## Products
 
-## Sitemap
-- https://www.dcodestech.com/sitemap.xml
+- [ERP Module](https://www.dcodestech.com/Product/erpModule): Modular ERP product for business operations.
+- [Hospital Management](https://www.dcodestech.com/Product/hospitalManagement): Hospital management software.
+- [Ticket](https://www.dcodestech.com/Product/ticket): Ticketing / support software.
+- [Chopada](https://www.dcodestech.com/Product/chopada): Chopada product by Dcodes Technologies.
+
+## Company
+
+- [About Us](https://www.dcodestech.com/AboutUs): Who we are and what we do.
+- [Portfolio](https://www.dcodestech.com/Portfolio): Selected client projects and case studies.
+- [Blog](https://www.dcodestech.com/Blog): Articles on web, app, ERP and digital marketing topics.
+- [Careers](https://www.dcodestech.com/careers): Open positions at Dcodes Technologies.
+- [Contact / Connect](https://www.dcodestech.com/connect): Get a quote or talk to our team.
+
+## Optional
+
+- [Privacy Policy](https://www.dcodestech.com/PrivacyPolicy)
+- [Terms and Conditions](https://www.dcodestech.com/TermsAndConditions)
