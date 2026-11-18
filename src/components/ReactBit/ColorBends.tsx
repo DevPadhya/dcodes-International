@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 type ColorBendsProps = {
@@ -273,5 +275,5 @@ export default function ColorBends({
       container.removeEventListener('pointermove', handlePointerMove);
     };
   }, []);
-  return <div ref={containerRef} className={`w-full h-full relative overflow-hidden ${className}`} style={style} />;
+  return <div ref={containerRef} className={`w-full h-full relative overflow-hidden ${className ?? ''}`.trim()} style={style} />;
 }

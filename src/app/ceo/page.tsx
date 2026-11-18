@@ -30,7 +30,6 @@ import {
   Brain,
   Trophy,
   BadgeCheck,
-  Download,
   Layers,
   Boxes,
   Cog,
@@ -46,6 +45,58 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
+
+const SITE = "https://www.dcodestech.com";
+// ⚠️ Aa page nu real route lakho (jem ke "/about/dev-padhya" ke "/DevPadhya")
+const PAGE_PATH = "/about/dev-padhya";
+const PAGE_URL = `${SITE}${PAGE_PATH}`;
+const PAGE_TITLE = "Dev Padhya | Founder & CEO of Dcodes Technologies";
+const PAGE_DESC =
+  "Meet Dev Padhya, Founder & CEO of Dcodes Technologies. Learn about his vision, values and approach to building technology that helps businesses grow.";
+const LINKEDIN_URL = "https://www.linkedin.com/in/dev-padhya/";
+const CALENDLY_URL = "https://calendly.com/developer-dcodestechnologies/30min";
+
+const safeJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": `${PAGE_URL}#page`,
+      url: PAGE_URL,
+      name: PAGE_TITLE,
+      mainEntity: { "@id": `${PAGE_URL}#person` },
+    },
+    {
+      "@type": "Person",
+      "@id": `${PAGE_URL}#person`,
+      name: "Dev Padhya",
+      givenName: "Dev",
+      familyName: "Padhya",
+      jobTitle: "Founder & Chief Executive Officer",
+      url: PAGE_URL,
+      image: `${SITE}/Dev_Padhya.png`,
+      worksFor: { "@id": `${SITE}/#organization` },
+      sameAs: [LINKEDIN_URL],
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE}/#organization`,
+      name: "Dcodes Technologies",
+      url: SITE,
+      logo: `${SITE}/logo.png`,
+      founder: { "@id": `${PAGE_URL}#person` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+        { "@type": "ListItem", position: 2, name: "Dev Padhya", item: PAGE_URL },
+      ],
+    },
+  ],
+};
 
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -82,8 +133,6 @@ function Reveal({
     </div>
   );
 }
-
-const BRANDS = ["KOTAN'S", "MADHURAM PRIME", "HandTreat PAPER"];
 
 const PRINCIPLES = [
   { icon: Sparkles, title: "Innovation", copy: "Always build better." },
@@ -156,354 +205,37 @@ const AWARDS = [
 export default function DevPadhyaPage() {
   const [imageError, setImageError] = useState(false);
 
-  // ==================== SEO META TAGS ====================
-  useEffect(() => {
-    // Update document title
-    document.title = "Dev Padhya | Founder & CEO of Dcodes Technologies ";
-    
-    // Meta Description
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.setAttribute('name', 'description');
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.setAttribute('content', "Dev Padhya, Founder & CEO of Dcodes Technologies, is helping businesses grow through innovative technology, digital transformation & bold vision for the future.");
-    
-    // Meta Keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute('content', "Dev Padhya, Dcodes Technologies, Founder, CEO, Digital Transformation, Technology Leader, Entrepreneur, Business Growth, Digital Solutions, Enterprise Software, AI Solutions, Web Development, Business Automation, Technology Consulting");
-    
-    // Viewport
-    let metaViewport = document.querySelector('meta[name="viewport"]');
-    if (!metaViewport) {
-      metaViewport = document.createElement('meta');
-      metaViewport.setAttribute('name', 'viewport');
-      document.head.appendChild(metaViewport);
-    }
-    metaViewport.setAttribute('content', "width=device-width, initial-scale=1.0");
-    
-    // Robots
-    let metaRobots = document.querySelector('meta[name="robots"]');
-    if (!metaRobots) {
-      metaRobots = document.createElement('meta');
-      metaRobots.setAttribute('name', 'robots');
-      document.head.appendChild(metaRobots);
-    }
-    metaRobots.setAttribute('content', "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
-    
-    // Author
-    let metaAuthor = document.querySelector('meta[name="author"]');
-    if (!metaAuthor) {
-      metaAuthor = document.createElement('meta');
-      metaAuthor.setAttribute('name', 'author');
-      document.head.appendChild(metaAuthor);
-    }
-    metaAuthor.setAttribute('content', "Dev Padhya, Dcodes Technologies");
-    
-    // Theme Color
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (!metaThemeColor) {
-      metaThemeColor = document.createElement('meta');
-      metaThemeColor.setAttribute('name', 'theme-color');
-      document.head.appendChild(metaThemeColor);
-    }
-    metaThemeColor.setAttribute('content', "#080d19");
-    
-    // Open Graph Tags
-    let ogTitle = document.querySelector('meta[property="og:title"]');
-    if (!ogTitle) {
-      ogTitle = document.createElement('meta');
-      ogTitle.setAttribute('property', 'og:title');
-      document.head.appendChild(ogTitle);
-    }
-    ogTitle.setAttribute('content', "Dev Padhya - Founder & CEO of Dcodes Technologies");
-    
-    let ogDescription = document.querySelector('meta[property="og:description"]');
-    if (!ogDescription) {
-      ogDescription = document.createElement('meta');
-      ogDescription.setAttribute('property', 'og:description');
-      document.head.appendChild(ogDescription);
-    }
-    ogDescription.setAttribute('content', "Meet Dev Padhya, the visionary Founder & CEO of Dcodes Technologies, dedicated to helping businesses succeed through innovative technology and digital transformation.");
-    
-    let ogType = document.querySelector('meta[property="og:type"]');
-    if (!ogType) {
-      ogType = document.createElement('meta');
-      ogType.setAttribute('property', 'og:type');
-      document.head.appendChild(ogType);
-    }
-    ogType.setAttribute('content', "profile");
-    
-    let ogUrl = document.querySelector('meta[property="og:url"]');
-    if (!ogUrl) {
-      ogUrl = document.createElement('meta');
-      ogUrl.setAttribute('property', 'og:url');
-      document.head.appendChild(ogUrl);
-    }
-    ogUrl.setAttribute('content', "https://dcodes.com/about/dev-padhya");
-    
-    let ogSiteName = document.querySelector('meta[property="og:site_name"]');
-    if (!ogSiteName) {
-      ogSiteName = document.createElement('meta');
-      ogSiteName.setAttribute('property', 'og:site_name');
-      document.head.appendChild(ogSiteName);
-    }
-    ogSiteName.setAttribute('content', "Dcodes Technologies");
-    
-    let ogImage = document.querySelector('meta[property="og:image"]');
-    if (!ogImage) {
-      ogImage = document.createElement('meta');
-      ogImage.setAttribute('property', 'og:image');
-      document.head.appendChild(ogImage);
-    }
-    ogImage.setAttribute('content', "https://dcodes.com/dev-padhya-og-image.jpg");
-    
-    let ogImageWidth = document.querySelector('meta[property="og:image:width"]');
-    if (!ogImageWidth) {
-      ogImageWidth = document.createElement('meta');
-      ogImageWidth.setAttribute('property', 'og:image:width');
-      document.head.appendChild(ogImageWidth);
-    }
-    ogImageWidth.setAttribute('content', "1200");
-    
-    let ogImageHeight = document.querySelector('meta[property="og:image:height"]');
-    if (!ogImageHeight) {
-      ogImageHeight = document.createElement('meta');
-      ogImageHeight.setAttribute('property', 'og:image:height');
-      document.head.appendChild(ogImageHeight);
-    }
-    ogImageHeight.setAttribute('content', "630");
-    
-    // Profile-specific OG tags
-    let ogProfileFirstName = document.querySelector('meta[property="og:profile:first_name"]');
-    if (!ogProfileFirstName) {
-      ogProfileFirstName = document.createElement('meta');
-      ogProfileFirstName.setAttribute('property', 'og:profile:first_name');
-      document.head.appendChild(ogProfileFirstName);
-    }
-    ogProfileFirstName.setAttribute('content', "Dev");
-    
-    let ogProfileLastName = document.querySelector('meta[property="og:profile:last_name"]');
-    if (!ogProfileLastName) {
-      ogProfileLastName = document.createElement('meta');
-      ogProfileLastName.setAttribute('property', 'og:profile:last_name');
-      document.head.appendChild(ogProfileLastName);
-    }
-    ogProfileLastName.setAttribute('content', "Padhya");
-    
-    let ogProfileUsername = document.querySelector('meta[property="og:profile:username"]');
-    if (!ogProfileUsername) {
-      ogProfileUsername = document.createElement('meta');
-      ogProfileUsername.setAttribute('property', 'og:profile:username');
-      document.head.appendChild(ogProfileUsername);
-    }
-    ogProfileUsername.setAttribute('content', "devpadhya");
-    
-    // Twitter Card Tags
-    let twitterCard = document.querySelector('meta[name="twitter:card"]');
-    if (!twitterCard) {
-      twitterCard = document.createElement('meta');
-      twitterCard.setAttribute('name', 'twitter:card');
-      document.head.appendChild(twitterCard);
-    }
-    twitterCard.setAttribute('content', "summary_large_image");
-    
-    let twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (!twitterTitle) {
-      twitterTitle = document.createElement('meta');
-      twitterTitle.setAttribute('name', 'twitter:title');
-      document.head.appendChild(twitterTitle);
-    }
-    twitterTitle.setAttribute('content', "Dev Padhya - Founder & CEO of Dcodes Technologies");
-    
-    let twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (!twitterDescription) {
-      twitterDescription = document.createElement('meta');
-      twitterDescription.setAttribute('name', 'twitter:description');
-      document.head.appendChild(twitterDescription);
-    }
-    twitterDescription.setAttribute('content', "Meet Dev Padhya, the visionary Founder & CEO of Dcodes Technologies, helping businesses succeed through innovative technology.");
-    
-    let twitterImage = document.querySelector('meta[name="twitter:image"]');
-    if (!twitterImage) {
-      twitterImage = document.createElement('meta');
-      twitterImage.setAttribute('name', 'twitter:image');
-      document.head.appendChild(twitterImage);
-    }
-    twitterImage.setAttribute('content', "https://dcodes.com/dev-padhya-twitter-image.jpg");
-    
-    let twitterSite = document.querySelector('meta[name="twitter:site"]');
-    if (!twitterSite) {
-      twitterSite = document.createElement('meta');
-      twitterSite.setAttribute('name', 'twitter:site');
-      document.head.appendChild(twitterSite);
-    }
-    twitterSite.setAttribute('content', "@dcodestech");
-    
-    let twitterCreator = document.querySelector('meta[name="twitter:creator"]');
-    if (!twitterCreator) {
-      twitterCreator = document.createElement('meta');
-      twitterCreator.setAttribute('name', 'twitter:creator');
-      document.head.appendChild(twitterCreator);
-    }
-    twitterCreator.setAttribute('content', "@devpadhya");
-    
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', "https://dcodes.com/about/dev-padhya");
-    
-    // Geo Tags
-    let geoRegion = document.querySelector('meta[name="geo.region"]');
-    if (!geoRegion) {
-      geoRegion = document.createElement('meta');
-      geoRegion.setAttribute('name', 'geo.region');
-      document.head.appendChild(geoRegion);
-    }
-    geoRegion.setAttribute('content', "IN-GJ");
-    
-    let geoPlacename = document.querySelector('meta[name="geo.placename"]');
-    if (!geoPlacename) {
-      geoPlacename = document.createElement('meta');
-      geoPlacename.setAttribute('name', 'geo.placename');
-      document.head.appendChild(geoPlacename);
-    }
-    geoPlacename.setAttribute('content', "Gujarat");
-    
-    // Language
-    let metaLanguage = document.querySelector('meta[http-equiv="content-language"]');
-    if (!metaLanguage) {
-      metaLanguage = document.createElement('meta');
-      metaLanguage.setAttribute('http-equiv', 'content-language');
-      document.head.appendChild(metaLanguage);
-    }
-    metaLanguage.setAttribute('content', "en");
-    
-    // ==================== STRUCTURED DATA ====================
-    
-    // Breadcrumb Structured Data
-    const structuredDataBreadcrumb = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://dcodes.com"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "About",
-          "item": "https://dcodes.com/about"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Dev Padhya",
-          "item": "https://dcodes.com/about/dev-padhya"
-        }
-      ]
-    };
-    
-    let scriptBreadcrumb = document.querySelector('#structured-data-breadcrumb');
-    if (!scriptBreadcrumb) {
-      scriptBreadcrumb = document.createElement('script');
-      scriptBreadcrumb.id = 'structured-data-breadcrumb';
-      scriptBreadcrumb.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptBreadcrumb);
-    }
-    scriptBreadcrumb.textContent = JSON.stringify(structuredDataBreadcrumb);
-    
-    // Person Structured Data
-    const structuredDataPerson = {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Dev Padhya",
-      "givenName": "Dev",
-      "familyName": "Padhya",
-      "jobTitle": "Founder & Chief Executive Officer",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Dcodes Technologies",
-        "url": "https://dcodes.com"
-      },
-      "url": "https://dcodes.com/about/dev-padhya",
-      "sameAs": [
-        "https://www.linkedin.com/in/dev-padhya/",
-        "https://twitter.com/devpadhya"
-      ],
-      "description": "Dev Padhya is the Founder & CEO of Dcodes Technologies, a leading digital transformation company helping businesses grow through innovative technology solutions.",
-      "alumniOf": {
-        "@type": "EducationalOrganization",
-        "name": "Second-generation entrepreneur with business and technology expertise"
-      },
-      "knowsAbout": [
-        "Digital Transformation",
-        "Enterprise Software",
-        "AI Solutions",
-        "Business Automation",
-        "Web Development",
-        "Technology Consulting",
-        "SaaS Development",
-        "Business Strategy",
-        "Leadership"
-      ]
-    };
-    
-    let scriptPerson = document.querySelector('#structured-data-person');
-    if (!scriptPerson) {
-      scriptPerson = document.createElement('script');
-      scriptPerson.id = 'structured-data-person';
-      scriptPerson.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptPerson);
-    }
-    scriptPerson.textContent = JSON.stringify(structuredDataPerson);
-    
-    // Organization Structured Data
-    const structuredDataOrganization = {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Dcodes Technologies",
-      "url": "https://dcodes.com",
-      "logo": "https://dcodes.com/logo.png",
-      "description": "Dcodes Technologies is a leading digital transformation company founded by Dev Padhya, providing innovative technology solutions to businesses worldwide.",
-      "founder": {
-        "@type": "Person",
-        "name": "Dev Padhya"
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/dcodestechnologies",
-        "https://twitter.com/dcodestech",
-        "https://www.facebook.com/dcodestechnologies",
-        "https://www.instagram.com/dcodestechnologies"
-      ]
-    };
-    
-    let scriptOrganization = document.querySelector('#structured-data-organization');
-    if (!scriptOrganization) {
-      scriptOrganization = document.createElement('script');
-      scriptOrganization.id = 'structured-data-organization';
-      scriptOrganization.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptOrganization);
-    }
-    scriptOrganization.textContent = JSON.stringify(structuredDataOrganization);
-    
-  }, []);
-
   return (
-    <>
+    <main>
+      {/* ===== SEO: React 19 hoists these into <head> and they are server-rendered ===== */}
+      <title>{PAGE_TITLE}</title>
+      <meta name="description" content={PAGE_DESC} />
+      <meta
+        name="robots"
+        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      />
+      <meta name="author" content="Dcodes Technologies" />
+      <link rel="canonical" href={PAGE_URL} />
+
+      <meta property="og:type" content="profile" />
+      <meta property="og:url" content={PAGE_URL} />
+      <meta property="og:site_name" content="Dcodes Technologies" />
+      <meta property="og:title" content="Dev Padhya - Founder & CEO of Dcodes Technologies" />
+      <meta property="og:description" content={PAGE_DESC} />
+      <meta property="og:image" content={`${SITE}/Dev_Padhya.png`} />
+      <meta property="og:profile:first_name" content="Dev" />
+      <meta property="og:profile:last_name" content="Padhya" />
+
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Dev Padhya - Founder & CEO of Dcodes Technologies" />
+      <meta name="twitter:description" content={PAGE_DESC} />
+      <meta name="twitter:image" content={`${SITE}/Dev_Padhya.png`} />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
+      />
+
       {/* ============================ HERO ============================ */}
       <section className="hero" id="about">
         <div className="hero__glow" aria-hidden="true" />
@@ -522,7 +254,7 @@ export default function DevPadhyaPage() {
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="portrait__fallback" aria-label="Dev Padhya portrait placeholder">
+                <div className="portrait__fallback" role="img" aria-label="Dev Padhya portrait placeholder">
                   <User size={80} className="portrait__fallback-icon" />
                   <span className="portrait__fallback-name">Dev Padhya</span>
                 </div>
@@ -546,14 +278,20 @@ export default function DevPadhyaPage() {
               <div className="hero__actions">
                 <a
                   className="btn btn--primary"
-                  href="https://www.linkedin.com/in/dev-padhya/"
+                  href={LINKEDIN_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Connect with Dev Padhya on LinkedIn"
                 >
                   <Linkedin size={16} /> Connect on LinkedIn
                 </a>
-                <a className="btn btn--secondary" href="https://calendly.com/developer-dcodestechnologies/30min" aria-label="Schedule a meeting with Dev Padhya">
+                <a
+                  className="btn btn--secondary"
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Schedule a meeting with Dev Padhya"
+                >
                   <CalendarDays size={16} /> Schedule a Meeting
                 </a>
               </div>
@@ -562,9 +300,6 @@ export default function DevPadhyaPage() {
         </div>
       </section>
 
-      {/* Trust Bar - Between Hero and Body */}
-      
-      
       {/* ============================ ABOUT ============================ */}
       <section className="section" id="who">
         <div className="container">
@@ -605,7 +340,7 @@ export default function DevPadhyaPage() {
             <Reveal className="about-vision">
               <div className="vision-card">
                 <div className="vision-item">
-                  <div className="vision-icon">
+                  <div className="vision-icon" aria-hidden="true">
                     <Eye size={22} />
                   </div>
                   <div>
@@ -621,7 +356,7 @@ export default function DevPadhyaPage() {
                 </div>
                 <div className="vision-divider" />
                 <div className="vision-item">
-                  <div className="vision-icon">
+                  <div className="vision-icon" aria-hidden="true">
                     <Target size={22} />
                   </div>
                   <div>
@@ -669,7 +404,7 @@ export default function DevPadhyaPage() {
             <Reveal className="values-cards">
               {PRINCIPLES.map(({ icon: Icon, title, copy }) => (
                 <div className="value-card" key={title}>
-                  <span className="value-icon">
+                  <span className="value-icon" aria-hidden="true">
                     <Icon size={20} />
                   </span>
                   <div>
@@ -693,7 +428,7 @@ export default function DevPadhyaPage() {
             <div className="industries-grid">
               {INDUSTRIES.map(({ icon: Icon, label }) => (
                 <div className="industry-item" key={label}>
-                  <span className="industry-icon">
+                  <span className="industry-icon" aria-hidden="true">
                     <Icon size={26} />
                   </span>
                   <span>{label}</span>
@@ -713,7 +448,7 @@ export default function DevPadhyaPage() {
               <div className="expertise-list">
                 {EXPERTISE.map(({ icon: Icon, label }) => (
                   <div className="expertise-item" key={label}>
-                    <span className="expertise-icon">
+                    <span className="expertise-icon" aria-hidden="true">
                       <Icon size={16} />
                     </span>
                     {label}
@@ -726,9 +461,9 @@ export default function DevPadhyaPage() {
               <p className="section-eyebrow">Journey & Milestones</p>
               <div className="milestones-grid">
                 {MILESTONES.map(({ icon: Icon, title }, i) => (
-                  <div className="milestone-item" key={title}>
-                    {i % 5 !== 0 && <span className="milestone-line" />}
-                    <span className="milestone-dot">
+                  <div className="milestone-item" key={title + i}>
+                    {i % 5 !== 0 && <span className="milestone-line" aria-hidden="true" />}
+                    <span className="milestone-dot" aria-hidden="true">
                       <Icon size={16} />
                     </span>
                     <p>{title}</p>
@@ -745,7 +480,7 @@ export default function DevPadhyaPage() {
         <div className="container">
           <div className="message-grid">
             <Reveal className="message-quote">
-              <Quote size={26} className="message-quote-icon" />
+              <Quote size={26} className="message-quote-icon" aria-hidden="true" />
               <p>
                 I don't build software.
                 <br />I build opportunities.
@@ -781,7 +516,7 @@ export default function DevPadhyaPage() {
                   Dev Padhya
                   <span>Founder & CEO, Dcodes Technologies</span>
                 </div>
-                <span className="message-scribble">Dev Padhya</span>
+                <span className="message-scribble" aria-hidden="true">Dev Padhya</span>
               </div>
             </Reveal>
           </div>
@@ -797,7 +532,7 @@ export default function DevPadhyaPage() {
               <div className="stats-list">
                 {NUMBERS.map((s) => (
                   <div className="stat-item" key={s.label}>
-                    <span className="stat-icon"><Award size={16} /></span>
+                    <span className="stat-icon" aria-hidden="true"><Award size={16} /></span>
                     <div>
                       <span className="stat-number">{s.num}</span>
                       <span className="stat-label">{s.label}</span>
@@ -812,7 +547,7 @@ export default function DevPadhyaPage() {
               <div className="awards-list">
                 {AWARDS.map(({ icon: Icon, title, sub }) => (
                   <div className="award-item" key={title}>
-                    <span className="award-icon">
+                    <span className="award-icon" aria-hidden="true">
                       <Icon size={26} />
                     </span>
                     <span className="award-label">
@@ -841,9 +576,9 @@ export default function DevPadhyaPage() {
               </p>
             </div>
             <div className="cta-actions">
-              <a 
-                className="btn btn--primary btn--lg" 
-                href="https://calendly.com/developer-dcodestechnologies/30min"
+              <a
+                className="btn btn--primary btn--lg"
+                href={CALENDLY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Schedule a consultation with Dev Padhya"
@@ -853,7 +588,7 @@ export default function DevPadhyaPage() {
             </div>
           </Reveal>
         </div>
-      </section> 
+      </section>
 
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
@@ -861,8 +596,7 @@ export default function DevPadhyaPage() {
         /* Page content styles - Dark theme with light text */
         .hero,
         .section,
-        .cta-section,
-        .trust-bar-wrapper {
+        .cta-section {
           font-family: "Inter", ui-sans-serif, sans-serif;
           color: #f5f6f8;
           background: #080d19;
@@ -1149,67 +883,6 @@ export default function DevPadhyaPage() {
           display: flex;
           flex-wrap: wrap;
           gap: 12px;
-        }
-
-        /* ============ TRUST BAR ============ */
-        .trust-bar-wrapper {
-          padding: 20px 0 40px 0;
-          background: #080d19;
-        }
-
-        .trust-bar {
-          padding: 22px 40px;
-          background: #111a30;
-          border: 1px solid rgba(245, 246, 248, 0.1);
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          gap: 40px;
-          flex-wrap: wrap;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        .trust-bar__label {
-          display: flex;
-          flex-direction: column;
-          flex-shrink: 0;
-        }
-
-        .trust-bar__label span {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: #7fb0ff;
-        }
-
-        .trust-bar__label strong {
-          font-size: 15px;
-          font-weight: 700;
-          color: #f5f6f8;
-        }
-
-        .trust-bar__brands {
-          display: flex;
-          align-items: center;
-          gap: 36px;
-          flex-wrap: wrap;
-          flex: 1;
-        }
-
-        .trust-bar__brand {
-          font-family: "Plus Jakarta Sans", ui-sans-serif, sans-serif;
-          font-weight: 700;
-          font-size: 16px;
-          color: #97a2bd;
-          letter-spacing: 0.02em;
-        }
-
-        .trust-bar__more {
-          font-size: 13px;
-          font-weight: 600;
-          color: #7fb0ff;
-          margin-left: auto;
         }
 
         /* ============ ABOUT ============ */
@@ -1681,7 +1354,7 @@ export default function DevPadhyaPage() {
             padding: 60px 0 40px;
             min-height: auto;
           }
-          
+
           .hero__grid {
             grid-template-columns: 1fr;
             gap: 40px;
@@ -1710,21 +1383,6 @@ export default function DevPadhyaPage() {
 
           .hero__actions {
             justify-content: center;
-          }
-
-          .trust-bar {
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 20px 24px;
-          }
-
-          .trust-bar__brands {
-            justify-content: center;
-            width: 100%;
-          }
-
-          .trust-bar__more {
-            margin-left: 0;
           }
 
           .about-grid {
@@ -1779,15 +1437,15 @@ export default function DevPadhyaPage() {
           .hero {
             padding: 40px 0 30px;
           }
-          
+
           .hero__title {
             font-size: 32px;
           }
-          
+
           .hero__grid {
             gap: 30px;
           }
-          
+
           .hero__portrait {
             max-width: 280px;
           }
@@ -1820,21 +1478,17 @@ export default function DevPadhyaPage() {
             margin: 24px 16px 40px;
             padding: 48px 20px;
           }
-
-          .trust-bar-wrapper {
-            padding: 20px 0 30px 0;
-          }
         }
 
         @media (max-width: 480px) {
           .hero {
             padding: 30px 0 20px;
           }
-          
+
           .hero__container {
             padding: 0 16px;
           }
-          
+
           .hero__portrait {
             max-width: 240px;
           }
@@ -1851,15 +1505,15 @@ export default function DevPadhyaPage() {
             width: 60px;
             height: 60px;
           }
-          
+
           .hero__title {
             font-size: 28px;
           }
-          
+
           .hero__headline {
             font-size: 16px;
           }
-          
+
           .hero__text {
             font-size: 14px;
           }
@@ -1887,21 +1541,8 @@ export default function DevPadhyaPage() {
           .section {
             padding: 60px 0;
           }
-
-          .trust-bar__brands {
-            gap: 16px;
-            justify-content: flex-start;
-          }
-
-          .trust-bar__brand {
-            font-size: 13px;
-          }
-
-          .trust-bar-wrapper {
-            padding: 15px 0 20px 0;
-          }
         }
       `}</style>
-    </>
+    </main>
   );
 }

@@ -10,10 +10,10 @@ export default function FullProtection() {
     // All shortcut keys to block
     const blockedKeys = [
       'F12', 
-      'I', // Ctrl+Shift+I
-      'J', // Ctrl+Shift+J  
-      'C', // Ctrl+Shift+C
-      'U'  // Ctrl+U
+      'I', 
+      'J', 
+      'C', 
+      'U'  
     ];
     
     // Modifier keys

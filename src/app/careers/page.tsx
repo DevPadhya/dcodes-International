@@ -7,13 +7,11 @@ import {
   orderBy,
   query,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
 } from "firebase/firestore";
-import { db, storage } from "@/lib/firebaseConfig";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "@/lib/firebaseConfig";
 import Link from "next/link";
 
-// Icons
 import {
   Mail,
   Phone,
@@ -29,10 +27,9 @@ import {
   Send,
   Upload,
   Loader2,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 
-// Define types
 type JobType = {
   id?: string;
   title: string;
@@ -45,21 +42,91 @@ type JobType = {
   type?: string;
   salary?: string;
   link?: string;
-  createdAt?: any;
+  createdAt?: string | null; // ISO string (made on the server)
+};
+
+const SITE = "https://www.dcodestech.com";
+const PAGE_URL = `${SITE}/careers`;
+const PAGE_TITLE = "Careers at Dcodes Technologies |Web & Marketing Jobs";
+const PAGE_DESC =
+  "Join Dcodes Technologies. Explore open roles in web and software development, digital marketing and IT, and apply online with your resume.";
+
+const EMPLOYMENT_TYPES = [
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACTOR",
+  "TEMPORARY",
+  "INTERN",
+  "VOLUNTEER",
+  "PER_DIEM",
+  "OTHER",
+];
+
+const mapEmploymentType = (t?: string) => {
+  const v = (t || "").toUpperCase().trim().replace(/[\s-]+/g, "_");
+  return EMPLOYMENT_TYPES.includes(v) ? v : "FULL_TIME";
+};
+
+const toText = (v?: string[] | string) => (Array.isArray(v) ? v.join(", ") : v || "");
+
+const safeJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
+
+const buildJobPostingJsonLd = (job: JobType) => {
+  // datePosted is required by Google - skip jobs without a real date
+  if (!job.createdAt || !job.title) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: job.title,
+    description: job.description || `${job.title} position at Dcodes Technologies`,
+    datePosted: job.createdAt,
+    employmentType: mapEmploymentType(job.type),
+    directApply: true,
+    url: `${PAGE_URL}#job-${job.id}`,
+    identifier: { "@type": "PropertyValue", name: "Dcodes Technologies", value: job.id },
+    hiringOrganization: {
+      "@type": "Organization",
+      name: "Dcodes Technologies",
+      sameAs: SITE,
+      logo: `${SITE}/logo.png`,
+    },
+    jobLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: job.location || "Ahmedabad",
+        addressRegion: "Gujarat",
+        addressCountry: "IN",
+      },
+    },
+    ...(job.experience ? { experienceRequirements: job.experience } : {}),
+    ...(toText(job.education) ? { educationRequirements: toText(job.education) } : {}),
+    ...(toText(job.skills) ? { skills: toText(job.skills) } : {}),
+  };
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+    { "@type": "ListItem", position: 2, name: "Careers", item: PAGE_URL },
+  ],
 };
 
 export default function CareersPage() {
-  // State for jobs
+  // Jobs
   const [jobs, setJobs] = useState<JobType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State for modals
+  // Modals
   const [selectedJob, setSelectedJob] = useState<JobType | null>(null);
   const [isJobDetailModalOpen, setIsJobDetailModalOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
-  // State for application form
+  // Application form
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -69,276 +136,16 @@ export default function CareersPage() {
     resume: null as File | null,
   });
 
-  // State for form submission
+  // Submission
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  // State for upload progress
   const [uploadProgress, setUploadProgress] = useState(0);
-
-  // SEO Meta Tags - Adding dynamically with useEffect
-  useEffect(() => {
-    // Update document title
-    document.title = "Careers at Dcodes Technologies | Jobs & Career Opportunities";
-    
-    // Update or create meta description
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.setAttribute('name', 'description');
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.setAttribute('content', "Explore careers at Dcodes Technologies. Join our team of web, mobile, and software experts — open positions in development, marketing, and IT support.");
-    
-    // Update or create keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute('content', "careers at Dcodes Technologies, Dcodes Technologies careers, jobs at Dcodes, technology jobs, software development careers, mobile app developer jobs, IT careers India");
-    
-    // Update or create viewport
-    let metaViewport = document.querySelector('meta[name="viewport"]');
-    if (!metaViewport) {
-      metaViewport = document.createElement('meta');
-      metaViewport.setAttribute('name', 'viewport');
-      document.head.appendChild(metaViewport);
-    }
-    metaViewport.setAttribute('content', "width=device-width, initial-scale=1.0");
-    
-    // Update or create robots
-    let metaRobots = document.querySelector('meta[name="robots"]');
-    if (!metaRobots) {
-      metaRobots = document.createElement('meta');
-      metaRobots.setAttribute('name', 'robots');
-      document.head.appendChild(metaRobots);
-    }
-    metaRobots.setAttribute('content', "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
-    
-    // Update or create author
-    let metaAuthor = document.querySelector('meta[name="author"]');
-    if (!metaAuthor) {
-      metaAuthor = document.createElement('meta');
-      metaAuthor.setAttribute('name', 'author');
-      document.head.appendChild(metaAuthor);
-    }
-    metaAuthor.setAttribute('content', "Dcodes Technologies");
-    
-    // Update or create theme-color
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (!metaThemeColor) {
-      metaThemeColor = document.createElement('meta');
-      metaThemeColor.setAttribute('name', 'theme-color');
-      document.head.appendChild(metaThemeColor);
-    }
-    metaThemeColor.setAttribute('content', "#000000");
-    
-    // Open Graph Tags
-    let ogTitle = document.querySelector('meta[property="og:title"]');
-    if (!ogTitle) {
-      ogTitle = document.createElement('meta');
-      ogTitle.setAttribute('property', 'og:title');
-      document.head.appendChild(ogTitle);
-    }
-    ogTitle.setAttribute('content', "Careers | Job Opportunities at Dcodes Technologies");
-    
-    let ogDescription = document.querySelector('meta[property="og:description"]');
-    if (!ogDescription) {
-      ogDescription = document.createElement('meta');
-      ogDescription.setAttribute('property', 'og:description');
-      document.head.appendChild(ogDescription);
-    }
-    ogDescription.setAttribute('content', "Join our team of dreamers, doers, and innovators shaping tomorrow's technology. Explore career opportunities at Dcodes.");
-    
-    let ogType = document.querySelector('meta[property="og:type"]');
-    if (!ogType) {
-      ogType = document.createElement('meta');
-      ogType.setAttribute('property', 'og:type');
-      document.head.appendChild(ogType);
-    }
-    ogType.setAttribute('content', "website");
-    
-    let ogUrl = document.querySelector('meta[property="og:url"]');
-    if (!ogUrl) {
-      ogUrl = document.createElement('meta');
-      ogUrl.setAttribute('property', 'og:url');
-      document.head.appendChild(ogUrl);
-    }
-    ogUrl.setAttribute('content', "https://dcodes.com/careers");
-    
-    let ogSiteName = document.querySelector('meta[property="og:site_name"]');
-    if (!ogSiteName) {
-      ogSiteName = document.createElement('meta');
-      ogSiteName.setAttribute('property', 'og:site_name');
-      document.head.appendChild(ogSiteName);
-    }
-    ogSiteName.setAttribute('content', "Dcodes Technologies");
-    
-    let ogImage = document.querySelector('meta[property="og:image"]');
-    if (!ogImage) {
-      ogImage = document.createElement('meta');
-      ogImage.setAttribute('property', 'og:image');
-      document.head.appendChild(ogImage);
-    }
-    ogImage.setAttribute('content', "https://dcodes.com/og-image-careers.jpg");
-    
-    // Twitter Card Tags
-    let twitterCard = document.querySelector('meta[name="twitter:card"]');
-    if (!twitterCard) {
-      twitterCard = document.createElement('meta');
-      twitterCard.setAttribute('name', 'twitter:card');
-      document.head.appendChild(twitterCard);
-    }
-    twitterCard.setAttribute('content', "summary_large_image");
-    
-    let twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (!twitterTitle) {
-      twitterTitle = document.createElement('meta');
-      twitterTitle.setAttribute('name', 'twitter:title');
-      document.head.appendChild(twitterTitle);
-    }
-    twitterTitle.setAttribute('content', "Careers at Dcodes Technologies");
-    
-    let twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (!twitterDescription) {
-      twitterDescription = document.createElement('meta');
-      twitterDescription.setAttribute('name', 'twitter:description');
-      document.head.appendChild(twitterDescription);
-    }
-    twitterDescription.setAttribute('content', "Explore job opportunities and join our innovative team.");
-    
-    let twitterImage = document.querySelector('meta[name="twitter:image"]');
-    if (!twitterImage) {
-      twitterImage = document.createElement('meta');
-      twitterImage.setAttribute('name', 'twitter:image');
-      document.head.appendChild(twitterImage);
-    }
-    twitterImage.setAttribute('content', "https://dcodes.com/twitter-card-careers.jpg");
-    
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', "https://dcodes.com/careers");
-    
-    // Geo tags
-    let geoRegion = document.querySelector('meta[name="geo.region"]');
-    if (!geoRegion) {
-      geoRegion = document.createElement('meta');
-      geoRegion.setAttribute('name', 'geo.region');
-      document.head.appendChild(geoRegion);
-    }
-    geoRegion.setAttribute('content', "IN-GJ");
-    
-    let geoPlacename = document.querySelector('meta[name="geo.placename"]');
-    if (!geoPlacename) {
-      geoPlacename = document.createElement('meta');
-      geoPlacename.setAttribute('name', 'geo.placename');
-      document.head.appendChild(geoPlacename);
-    }
-    geoPlacename.setAttribute('content', "Gujarat");
-    
-    // Language
-    let metaLanguage = document.querySelector('meta[http-equiv="content-language"]');
-    if (!metaLanguage) {
-      metaLanguage = document.createElement('meta');
-      metaLanguage.setAttribute('http-equiv', 'content-language');
-      document.head.appendChild(metaLanguage);
-    }
-    metaLanguage.setAttribute('content', "en");
-    
-    // Breadcrumb Structured Data
-    const structuredDataBreadcrumb = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://dcodes.com"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Careers",
-          "item": "https://dcodes.com/careers"
-        }
-      ]
-    };
-    
-    let scriptBreadcrumb = document.querySelector('#structured-data-breadcrumb');
-    if (!scriptBreadcrumb) {
-      scriptBreadcrumb = document.createElement('script');
-      scriptBreadcrumb.id = 'structured-data-breadcrumb';
-      scriptBreadcrumb.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptBreadcrumb);
-    }
-    scriptBreadcrumb.textContent = JSON.stringify(structuredDataBreadcrumb);
-    
-  }, []);
-
-  // Update job structured data when jobs change
-  useEffect(() => {
-    if (jobs.length > 0) {
-      const structuredDataJobs = {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": "Job Openings at Dcodes Technologies",
-        "description": "Current career opportunities and job openings",
-        "numberOfItems": jobs.length,
-        "itemListElement": jobs.map((job, index) => ({
-          "@type": "ListItem",
-          "position": index + 1,
-          "item": {
-            "@type": "JobPosting",
-            "title": job.title,
-            "description": job.description || "Join our innovative team at Dcodes Technologies",
-            "employmentType": job.type || "FULL_TIME",
-            "hiringOrganization": {
-              "@type": "Organization",
-              "name": "Dcodes Technologies",
-              "url": "https://dcodes.com"
-            },
-            "jobLocation": {
-              "@type": "Place",
-              "address": {
-                "@type": "PostalAddress",
-                "addressLocality": job.location || "Gujarat",
-                "addressRegion": "GJ",
-                "addressCountry": "IN"
-              }
-            },
-            "experienceRequirements": job.experience || "Not specified",
-            "educationRequirements": job.education || "Not specified",
-            "skills": job.skills || [],
-            "datePosted": job.createdAt?.toDate?.().toISOString() || new Date().toISOString()
-          }
-        }))
-      };
-      
-      let scriptJobs = document.querySelector('#structured-data-jobs');
-      if (!scriptJobs) {
-        scriptJobs = document.createElement('script');
-        scriptJobs.id = 'structured-data-jobs';
-        scriptJobs.setAttribute('type', 'application/ld+json');
-        document.head.appendChild(scriptJobs);
-      }
-      scriptJobs.textContent = JSON.stringify(structuredDataJobs);
-    }
-  }, [jobs]);
 
   // Fetch jobs from Firestore
   useEffect(() => {
     async function fetchJobs() {
       try {
-        console.log("Fetching jobs from Firestore...");
         const q = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
@@ -357,11 +164,10 @@ export default function CareersPage() {
             type: data.type || "",
             salary: data.salary || "",
             link: data.link || "",
-            createdAt: data.createdAt
+            createdAt: data.createdAt?.toDate?.()?.toISOString?.() ?? null,
           });
         });
 
-        console.log(`Found ${jobsList.length} jobs`);
         setJobs(jobsList);
         setError(null);
       } catch (err) {
@@ -375,25 +181,32 @@ export default function CareersPage() {
     fetchJobs();
   }, []);
 
-  // Open job detail modal
+  // Close modals with Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (isApplyModalOpen && !isSubmitting) closeApplyModal();
+        else if (isJobDetailModalOpen) closeJobDetailModal();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isApplyModalOpen, isJobDetailModalOpen, isSubmitting]);
+
   const openJobDetailModal = (job: JobType) => {
     setSelectedJob(job);
     setIsJobDetailModalOpen(true);
   };
 
-  // Close job detail modal
   const closeJobDetailModal = () => {
     setIsJobDetailModalOpen(false);
     setSelectedJob(null);
   };
 
-  // Open apply modal
   const openApplyModal = (job: JobType) => {
     setSelectedJob(job);
-    setFormData(prev => ({
-      ...prev,
-      role: job.title || ""
-    }));
+    setFormData((prev) => ({ ...prev, role: job.title || "" }));
     setIsApplyModalOpen(true);
     setMessage("");
     setSubmitSuccess(false);
@@ -401,18 +214,15 @@ export default function CareersPage() {
     setUploadProgress(0);
   };
 
-  // Open general application modal (extra button)
   const openGeneralApplyModal = () => {
     const generalJob: JobType = {
       id: "general",
       title: "General Application",
-      description: "Apply to join our team at Dcodes Technologies. We're always looking for talented individuals!"
+      description:
+        "Apply to join our team at Dcodes Technologies. We're always looking for talented individuals!",
     };
     setSelectedJob(generalJob);
-    setFormData(prev => ({
-      ...prev,
-      role: "" // Empty role - user will fill it themselves
-    }));
+    setFormData((prev) => ({ ...prev, role: "" }));
     setIsApplyModalOpen(true);
     setMessage("");
     setSubmitSuccess(false);
@@ -420,48 +230,33 @@ export default function CareersPage() {
     setUploadProgress(0);
   };
 
-  // Close apply modal
   const closeApplyModal = () => {
     setIsApplyModalOpen(false);
     setSelectedJob(null);
     resetForm();
   };
 
-  // Reset form
   const resetForm = () => {
-    setFormData({
-      name: "",
-      email: "",
-      experience: "",
-      role: "",
-      phone: "",
-      resume: null,
-    });
+    setFormData({ name: "", email: "", experience: "", role: "", phone: "", resume: null });
     setMessage("");
     setIsSubmitting(false);
     setSubmitSuccess(false);
     setUploadProgress(0);
   };
 
-  // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
 
     if (file) {
-      // Validate file type
       const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       ];
 
       if (!allowedTypes.includes(file.type)) {
@@ -469,74 +264,63 @@ export default function CareersPage() {
         return;
       }
 
-      // Validate file size (5MB max)
+      // NOTE: a Firestore document can hold at most ~1 MiB. A base64 resume above ~700 KB
+      // will fail to save. Move resumes to Firebase Storage (see notes) or lower this limit.
       if (file.size > 5 * 1024 * 1024) {
         setMessage("❌ File size should be less than 5MB.");
         return;
       }
 
-      setFormData(prev => ({
-        ...prev,
-        resume: file
-      }));
-
+      setFormData((prev) => ({ ...prev, resume: file }));
       setMessage("");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation
+
     if (!formData.name || !formData.email || !formData.phone || !formData.resume) {
       setMessage("❌ Please fill all required fields.");
       return;
     }
-    
+
     setIsSubmitting(true);
     setUploadProgress(30);
-    
+
     try {
-      // Convert file to base64 string
       const reader = new FileReader();
-      
+
       reader.onload = async (event) => {
         try {
           const base64String = event.target?.result as string;
           setUploadProgress(60);
-          
-          // Save directly to Firestore
+
           const docRef = await addDoc(collection(db, "jobApplications"), {
-            // Personal info
             name: formData.name.trim(),
             email: formData.email.trim(),
             phone: formData.phone.trim(),
             experience: formData.experience.trim() || "Not specified",
-            
-            // Job info
+
             role: formData.role.trim() || selectedJob?.title || "",
             jobId: selectedJob?.id || null,
             jobTitle: selectedJob?.title || null,
-            
-            // Resume as base64
+
             resumeBase64: base64String,
-            resumeName: formData.resume.name,
-            resumeType: formData.resume.type,
-            resumeSize: formData.resume.size,
-            
-            // Timestamps
+            resumeName: formData.resume!.name,
+            resumeType: formData.resume!.type,
+            resumeSize: formData.resume!.size,
+
             createdAt: serverTimestamp(),
             submittedAt: new Date().toISOString(),
-            
-            // Status
-            status: "pending",
-            source: "careers-page"
-          });
-          
-          setUploadProgress(80);
-          console.log("✅ Saved to Firestore, ID:", docRef.id);
 
-          // Trigger acknowledgment + admin notification emails
+            status: "pending",
+            source: "careers-page",
+          });
+
+          setUploadProgress(80);
+          console.log("Saved to Firestore, ID:", docRef.id);
+
+          // Acknowledgment + admin notification emails
           // (Firestore save already succeeded — email failure should not block success UI)
           try {
             await fetch("/api/apply", {
@@ -557,12 +341,11 @@ export default function CareersPage() {
           setUploadProgress(100);
           setSubmitSuccess(true);
           setMessage("✅ Application submitted successfully!");
-          
+
           setTimeout(() => {
             resetForm();
             closeApplyModal();
           }, 3000);
-          
         } catch (firestoreError) {
           console.error("Firestore error:", firestoreError);
           setMessage("❌ Failed to save application data.");
@@ -570,16 +353,14 @@ export default function CareersPage() {
           setIsSubmitting(false);
         }
       };
-      
+
       reader.onerror = () => {
         setMessage("❌ Failed to read file.");
         setUploadProgress(0);
         setIsSubmitting(false);
       };
-      
-      // Start reading file
+
       reader.readAsDataURL(formData.resume);
-      
     } catch (error: any) {
       console.error("Error:", error);
       setMessage(`❌ ${error.message || "Submission failed"}`);
@@ -588,23 +369,55 @@ export default function CareersPage() {
     }
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-white/70">Loading opportunities...</p>
-        </div>
-      </div>
-    );
-  }
+  const jobPostings = jobs.map(buildJobPostingJsonLd).filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-black text-white">
+      {/* ===== SEO (React 19 hoists these into <head>, and they are server-rendered) =====
+          IMPORTANT: app/layout.tsx must NOT set title / description / canonical / og:* / twitter:*
+          (neither in `metadata` nor in a hardcoded <head>), otherwise they appear twice. */}
+      <title>{PAGE_TITLE}</title>
+      <meta name="description" content={PAGE_DESC} />
+      <meta
+        name="robots"
+        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      />
+      <link rel="canonical" href={PAGE_URL} />
+
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={PAGE_URL} />
+      <meta property="og:site_name" content="Dcodes Technologies" />
+      <meta property="og:title" content="Careers at Dcodes Technologies" />
+      <meta
+        property="og:description"
+        content="Join our team of builders shaping tomorrow's technology. Explore open roles at Dcodes Technologies."
+      />
+      <meta property="og:image" content={`${SITE}/og-careers.jpg`} />
+
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Careers at Dcodes Technologies" />
+      <meta name="twitter:description" content="Explore job opportunities and join our team." />
+      <meta name="twitter:image" content={`${SITE}/og-careers.jpg`} />
+
+      {/* Structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJson(breadcrumbJsonLd) }}
+      />
+      {jobPostings.map((jp, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJson(jp) }}
+        />
+      ))}
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div style={{ width: '100%', height: '800px', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
+      <section className="relative overflow-hidden" aria-labelledby="careers-heading">
+        <div
+          aria-hidden="true"
+          style={{ width: "100%", height: "800px", position: "absolute", top: 0, left: 0, zIndex: 0 }}
+        >
           <Galaxy
             mouseRepulsion={false}
             mouseInteraction={true}
@@ -617,15 +430,24 @@ export default function CareersPage() {
 
         <div className="relative max-w-7xl mx-auto px-6 py-20 lg:py-28">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl lg:text-7xl font-normal mb-6 tracking-tight">
-              Build the <span className="text-blue-400">Future</span> with Dcodes
+            <p className="text-blue-400 uppercase tracking-widest text-sm mb-4">
+              Careers at Dcodes Technologies
+            </p>
+            <h1
+              id="careers-heading"
+              className="text-5xl lg:text-7xl font-normal mb-6 tracking-tight"
+            >
+              Build the <span className="text-blue-400">Future</span> with Dcodes Technologies
             </h1>
             <p className="text-xl lg:text-2xl text-white/70 mb-10 leading-relaxed font-normal">
-              We're a team of dreamers, doers, and innovators shaping tomorrow's technology. Join us to create what's next.
+              We're a team of dreamers, doers, and innovators shaping tomorrow's technology. Join us
+              to create what's next.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => document.getElementById('jobs-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() =>
+                  document.getElementById("jobs-section")?.scrollIntoView({ behavior: "smooth" })
+                }
                 className="bg-blue-600 text-white px-8 py-4 rounded-full hover:bg-blue-700 transition-all duration-300 font-medium text-lg flex items-center justify-center gap-3 group"
                 aria-label="View open job positions at Dcodes Technologies"
               >
@@ -644,11 +466,13 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* Why Work With Us Section */}
-      <section id="life-at-dcode" className="py-20 bg-white/5">
+      {/* Why Work With Us */}
+      <section id="life-at-dcode" className="py-20 bg-white/5" aria-labelledby="why-heading">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-normal mb-4">Why Work With Us</h2>
+            <h2 id="why-heading" className="text-4xl font-normal mb-4">
+              Why Work With Us
+            </h2>
             <p className="text-white/60 text-lg max-w-2xl mx-auto">
               Join a culture that fosters innovation, growth, and meaningful impact
             </p>
@@ -695,7 +519,7 @@ export default function CareersPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10"></div>
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-normal mb-6 leading-tight">
-            At Dcode, we don't just build products — we build people.
+            At Dcodes, we don't just build products — we build people.
           </h2>
           <p className="text-xl text-white/70 font-normal">
             Our team thrives on creativity, curiosity, and continuous learning.
@@ -704,18 +528,20 @@ export default function CareersPage() {
       </section>
 
       {/* Jobs Listing Section */}
-      <section id="jobs-section" className="py-20">
+      <section id="jobs-section" className="py-20" aria-labelledby="jobs-heading">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-normal mb-4">Open Positions</h2>
+            <h2 id="jobs-heading" className="text-4xl font-normal mb-4">
+              Open Positions
+            </h2>
             <p className="text-white/60 text-lg">Join our team and shape the future with us</p>
           </div>
 
-          {/* 🔥 EXTRA APPLY BUTTON - Always visible, even when no jobs */}
+          {/* General apply button - always visible */}
           <div className="text-center mb-12">
             <button
               onClick={openGeneralApplyModal}
-              className="inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-full transition-all duration-300 font-medium text-lg shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50"
+              className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-full transition-all duration-300 font-medium text-lg shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50"
               aria-label="Apply for general position at Dcodes Technologies"
             >
               <Briefcase className="w-5 h-5" />
@@ -727,7 +553,12 @@ export default function CareersPage() {
             </p>
           </div>
 
-          {error ? (
+          {loading ? (
+            <div className="flex flex-col items-center gap-4 py-16">
+              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-white/70">Loading opportunities...</p>
+            </div>
+          ) : error ? (
             <div className="text-center py-16">
               <div className="w-16 h-16 bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <X className="w-8 h-8 text-red-400" />
@@ -750,9 +581,10 @@ export default function CareersPage() {
           ) : (
             <div className="space-y-6 max-w-4xl mx-auto">
               {jobs.map((job) => (
-                <div
+                <article
                   key={job.id}
-                  className="group bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/8 hover:border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300"
+                  id={`job-${job.id}`}
+                  className="group bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 hover:border-white/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                     {/* Left Content */}
@@ -775,9 +607,9 @@ export default function CareersPage() {
                         )}
                       </div>
 
-                      <h2 className="text-2xl font-normal text-white group-hover:text-white/90 transition-colors">
+                      <h3 className="text-2xl font-normal text-white group-hover:text-white/90 transition-colors">
                         {job.title}
-                      </h2>
+                      </h3>
 
                       <p className="text-white/70 leading-relaxed text-lg font-normal">
                         {job.description}
@@ -793,10 +625,7 @@ export default function CareersPage() {
                           <div className="flex flex-wrap gap-2">
                             {Array.isArray(job.education) ? (
                               job.education.map((edu: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className="px-3 py-1 text-sm bg-white/10 rounded-full"
-                                >
+                                <span key={i} className="px-3 py-1 text-sm bg-white/10 rounded-full">
                                   {edu}
                                 </span>
                               ))
@@ -819,10 +648,7 @@ export default function CareersPage() {
                           <div className="flex flex-wrap gap-2">
                             {Array.isArray(job.skills) ? (
                               job.skills.map((skill: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className="px-3 py-1 text-sm bg-white/10 rounded-full"
-                                >
+                                <span key={i} className="px-3 py-1 text-sm bg-white/10 rounded-full">
                                   {skill}
                                 </span>
                               ))
@@ -867,7 +693,7 @@ export default function CareersPage() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
@@ -875,11 +701,14 @@ export default function CareersPage() {
       </section>
 
       {/* Hiring Process Section */}
-      <section className="py-24 text-white relative overflow-hidden">
+      <section className="py-24 text-white relative overflow-hidden" aria-labelledby="process-heading">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10"></div>
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-5xl font-semibold mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            <h2
+              id="process-heading"
+              className="text-5xl font-semibold mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent"
+            >
               Our Hiring Process
             </h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
@@ -905,7 +734,10 @@ export default function CareersPage() {
                   </div>
 
                   {index < array.length - 1 && (
-                    <div className="hidden md:block absolute top-1/2 left-full transform -translate-y-1/2 translate-x-4">
+                    <div
+                      aria-hidden="true"
+                      className="hidden md:block absolute top-1/2 left-full transform -translate-y-1/2 translate-x-4"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -935,11 +767,15 @@ export default function CareersPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20">
+      <section className="py-20" aria-labelledby="stories-heading">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-normal mb-4">Employee Stories</h2>
-            <p className="text-white/60 text-lg">Hear from our team members about their journey at DCodes</p>
+            <h2 id="stories-heading" className="text-4xl font-normal mb-4">
+              Employee Stories
+            </h2>
+            <p className="text-white/60 text-lg">
+              Hear from our team members about their journey at Dcodes
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -947,24 +783,32 @@ export default function CareersPage() {
               {
                 name: "Milan Aaradeshna",
                 role: "Wordpress Developer",
-                quote: "Dcodes helped me grow over 3 years as a WordPress developer, enhancing my skills through challenging projects",
-                avatar: "👩‍💻"
+                quote:
+                  "Dcodes helped me grow over 3 years as a WordPress developer, enhancing my skills through challenging projects",
+                avatar: "👩‍💻",
               },
               {
                 name: "Kunj Thakar",
                 role: "Social Media Manager",
-                quote: "Working at Dcodes has been an incredible journey. The team's support and the projects we work on make every day exciting.",
-                avatar: "👨‍💼"
+                quote:
+                  "Working at Dcodes has been an incredible journey. The team's support and the projects we work on make every day exciting.",
+                avatar: "👨‍💼",
               },
               {
                 name: "Khushali Parikh",
-                role: "Backend Developer",
-                quote: "Dcodes has been a great place to learn and grow. The projects are challenging and rewarding.",
-                avatar: "👩‍🎨"
-              }
+                role: "Full-stack Developer",
+                quote:
+                  "Dcodes has been a great place to learn and grow. The projects are challenging and rewarding.",
+                avatar: "👩‍🎨",
+              },
             ].map((testimonial, index) => (
-              <div key={index} className="border border-white/10 rounded-2xl p-8 hover:bg-white/8 transition-all duration-300">
-                <div className="text-4xl mb-4">{testimonial.avatar}</div>
+              <div
+                key={index}
+                className="border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300"
+              >
+                <div className="text-4xl mb-4" aria-hidden="true">
+                  {testimonial.avatar}
+                </div>
                 <p className="text-white/80 text-lg mb-6 italic">"{testimonial.quote}"</p>
                 <p className="font-medium text-white">{testimonial.name}</p>
                 <p className="text-white/60 text-sm">{testimonial.role}</p>
@@ -975,11 +819,13 @@ export default function CareersPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 border-t border-white/10">
+      <section className="py-20 border-t border-white/10" aria-labelledby="contact-heading">
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-normal mb-3">Ready to Shape the Future?</h2>
+              <h2 id="contact-heading" className="text-3xl font-normal mb-3">
+                Ready to Shape the Future?
+              </h2>
               <p className="text-white/60 text-lg">
                 Be part of a team that thrives on innovation, collaboration, and growth.
               </p>
@@ -995,9 +841,7 @@ export default function CareersPage() {
                   <Mail className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-white/60 text-sm font-medium uppercase tracking-wide mb-1">
-                    Email
-                  </p>
+                  <p className="text-white/60 text-sm font-medium uppercase tracking-wide mb-1">Email</p>
                   <p className="text-white text-lg font-normal">hr@dcodestech.com</p>
                 </div>
               </a>
@@ -1011,9 +855,7 @@ export default function CareersPage() {
                   <Phone className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-white/60 text-sm font-medium uppercase tracking-wide mb-1">
-                    Phone
-                  </p>
+                  <p className="text-white/60 text-sm font-medium uppercase tracking-wide mb-1">Phone</p>
                   <p className="text-white text-lg font-normal">+91 6353 653 977</p>
                 </div>
               </a>
@@ -1024,7 +866,12 @@ export default function CareersPage() {
 
       {/* Job Detail Modal */}
       {isJobDetailModalOpen && selectedJob && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedJob.title} details`}
+        >
           <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-start mb-6">
@@ -1046,7 +893,7 @@ export default function CareersPage() {
                       </span>
                     )}
                   </div>
-                  <h2 className="text-2xl font-bold text-white">{selectedJob.title}</h2>
+                  <h3 className="text-2xl font-bold text-white">{selectedJob.title}</h3>
                 </div>
                 <button
                   onClick={closeJobDetailModal}
@@ -1060,17 +907,17 @@ export default function CareersPage() {
               <div className="space-y-6">
                 {selectedJob.description && (
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Job Description</h3>
+                    <h4 className="text-lg font-semibold text-white mb-3">Job Description</h4>
                     <p className="text-gray-300 leading-relaxed">{selectedJob.description}</p>
                   </div>
                 )}
 
                 {selectedJob.education && (
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                       <GraduationCap className="w-5 h-5" />
                       Education Requirements
-                    </h3>
+                    </h4>
                     <div className="flex flex-wrap gap-2">
                       {Array.isArray(selectedJob.education) ? (
                         selectedJob.education.map((edu: string, i: number) => (
@@ -1092,10 +939,10 @@ export default function CareersPage() {
 
                 {selectedJob.skills && (
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                       <Star className="w-5 h-5" />
                       Required Skills
-                    </h3>
+                    </h4>
                     <div className="flex flex-wrap gap-2">
                       {Array.isArray(selectedJob.skills) ? (
                         selectedJob.skills.map((skill: string, i: number) => (
@@ -1118,8 +965,9 @@ export default function CareersPage() {
                 <div className="pt-6 border-t border-gray-800 flex gap-4">
                   <button
                     onClick={() => {
+                      const job = selectedJob;
                       closeJobDetailModal();
-                      openApplyModal(selectedJob);
+                      openApplyModal(job);
                     }}
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
                     aria-label={`Apply for ${selectedJob.title} position`}
@@ -1142,8 +990,13 @@ export default function CareersPage() {
 
       {/* Apply Form Modal */}
       {isApplyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="max-w-2xl w-full bg-gray-900/95 border border-gray-800 rounded-2xl shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Job application form"
+        >
+          <div className="max-w-2xl w-full max-h-[95vh] overflow-y-auto bg-gray-900/95 border border-gray-800 rounded-2xl shadow-2xl">
             <div className="border-b border-gray-800 p-6">
               <div className="flex justify-between items-center">
                 <div>
@@ -1151,7 +1004,9 @@ export default function CareersPage() {
                     Apply for{" "}
                     <span className="text-blue-400">{selectedJob?.title || "this position"}</span>
                   </h3>
-                  <p className="text-gray-400 text-sm mt-1">Fill out the form below to submit your application</p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Fill out the form below to submit your application
+                  </p>
                 </div>
                 <button
                   onClick={closeApplyModal}
@@ -1215,7 +1070,6 @@ export default function CareersPage() {
                         className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="John Doe"
                         disabled={isSubmitting}
-                        aria-label="Your full name"
                         aria-required="true"
                       />
                     </div>
@@ -1234,7 +1088,6 @@ export default function CareersPage() {
                         className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="example@gmail.com"
                         disabled={isSubmitting}
-                        aria-label="Your email address"
                         aria-required="true"
                       />
                     </div>
@@ -1253,7 +1106,6 @@ export default function CareersPage() {
                         className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="9876543210"
                         disabled={isSubmitting}
-                        aria-label="Your phone number"
                         aria-required="true"
                       />
                     </div>
@@ -1271,7 +1123,6 @@ export default function CareersPage() {
                         className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="e.g., 3"
                         disabled={isSubmitting}
-                        aria-label="Your years of experience"
                       />
                     </div>
 
@@ -1289,18 +1140,20 @@ export default function CareersPage() {
                         className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="e.g., Frontend Developer"
                         disabled={isSubmitting}
-                        aria-label="Job position applying for"
                         aria-required="true"
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <label htmlFor="resume" className="block text-sm font-medium text-gray-300 mb-2">
-                        Resume / CV *
-                      </label>
+                      <span className="block text-sm font-medium text-gray-300 mb-2">Resume / CV *</span>
                       <div className="space-y-4">
                         <div className="flex items-center justify-center w-full">
-                          <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer ${isSubmitting ? 'bg-gray-900' : 'bg-gray-800 hover:bg-gray-800/50'} transition-colors`}>
+                          <label
+                            htmlFor="resume"
+                            className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer ${
+                              isSubmitting ? "bg-gray-900" : "bg-gray-800 hover:bg-gray-800/50"
+                            } transition-colors`}
+                          >
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <Upload className="w-8 h-8 mb-3 text-gray-400" />
                               <p className="mb-1 text-sm text-gray-400">
@@ -1314,10 +1167,9 @@ export default function CareersPage() {
                               name="resume"
                               onChange={handleFileChange}
                               accept=".pdf,.doc,.docx"
-                              required
+                              required={!formData.resume}
                               className="hidden"
                               disabled={isSubmitting}
-                              aria-label="Upload your resume or CV"
                               aria-required="true"
                             />
                           </label>
@@ -1328,22 +1180,31 @@ export default function CareersPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center">
-                                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  <svg
+                                    className="w-6 h-6 text-blue-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
                                   </svg>
                                 </div>
                                 <div>
                                   <p className="text-white font-medium">{formData.resume.name}</p>
                                   <p className="text-gray-400 text-sm">
-                                    {(formData.resume.size / 1024 / 1024).toFixed(2)} MB • {formData.resume.type.split('/')[1].toUpperCase()}
+                                    {(formData.resume.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                                    {(formData.resume.type.split("/")[1] || "FILE").toUpperCase()}
                                   </p>
                                 </div>
                               </div>
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setFormData(prev => ({ ...prev, resume: null }));
-                                }}
+                                onClick={() => setFormData((prev) => ({ ...prev, resume: null }))}
                                 className="text-gray-400 hover:text-red-400 transition-colors"
                                 disabled={isSubmitting}
                                 aria-label="Remove uploaded resume"
@@ -1358,8 +1219,14 @@ export default function CareersPage() {
                   </div>
 
                   {message && (
-                    <div className={`p-4 rounded-lg ${message.includes("✅") ? "bg-green-900/30 border border-green-800" : "bg-red-900/30 border border-red-800"}`}>
-                      <p className={`${message.includes("✅") ? "text-green-400" : "text-red-400"}`}>
+                    <div
+                      className={`p-4 rounded-lg ${
+                        message.includes("✅")
+                          ? "bg-green-900/30 border border-green-800"
+                          : "bg-red-900/30 border border-red-800"
+                      }`}
+                    >
+                      <p className={message.includes("✅") ? "text-green-400" : "text-red-400"}>
                         {message}
                       </p>
                     </div>
@@ -1395,9 +1262,10 @@ export default function CareersPage() {
                       Cancel
                     </button>
                   </div>
-                  
+
                   <p className="text-center text-sm text-gray-500 pt-4">
-                    By submitting this form, you agree to our privacy policy and consent to us contacting you about this position.
+                    By submitting this form, you agree to our privacy policy and consent to us
+                    contacting you about this position.
                   </p>
                 </>
               )}
@@ -1405,6 +1273,6 @@ export default function CareersPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }
