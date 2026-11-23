@@ -201,7 +201,6 @@ const ConnectUsForm = () => {
     { value: "mobile", label: "Mobile Development" },
     { value: "seo", label: "SEO & Marketing" },
     { value: "digital marketing", label: "Digital Marketing" },
-    // {value: de}
   ];
 
   if (isSubmitted) {
@@ -215,9 +214,9 @@ const ConnectUsForm = () => {
             <div className="w-24 h-24 mx-auto mb-8 border border-white/10 rounded-full flex items-center justify-center backdrop-blur-sm bg-white/5">
               <Check className="w-12 h-12 text-white" />
             </div>
-            <h1 className="text-4xl font-extralight text-white mb-6 tracking-[0.2em]">
+            <h2 className="text-4xl font-extralight text-white mb-6 tracking-[0.2em]">
               MESSAGE SENT
-            </h1>
+            </h2>
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-8" />
             <p className="text-white/60 font-normal text-lg leading-relaxed">
               Thank you for reaching out. We'll review your request and respond within 24 hours.
@@ -240,9 +239,9 @@ const ConnectUsForm = () => {
           
           {/* Header */}
           <div className="text-center mb-16 lg:mb-24 text-white">
-            <h1 className="text-6xl lg:text-8xl font-extralight text-white mb-8 tracking-[0.3em]">
+            <h2 className="text-6xl lg:text-8xl font-extralight text-white mb-8 tracking-[0.3em]">
               CONNECT
-            </h1>
+            </h2>
             <div className="w-32 h-px text-white bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-12" />
             <p className="text-white/60 font-normal text-lg tracking-wide max-w-2xl mx-auto leading-relaxed">
 Let’s Turn Your Vision Into Reality

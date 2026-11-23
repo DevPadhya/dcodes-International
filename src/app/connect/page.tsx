@@ -1,27 +1,118 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { db } from "@/lib/firebaseConfig";  
+import { db } from "@/lib/firebaseConfig";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 import { User, Mail, Phone, MessageSquare, Send, Check, ArrowLeft, RefreshCw, MapPin } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import Link from 'next/link';
-import MapComponent from '@/components/MapComponent';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import MapComponent from "@/components/MapComponent";
+
+const SITE = "https://www.dcodestech.com";
+const PAGE_URL = `${SITE}/connect`;
+const PAGE_TITLE = "Contact Dcodes Technologies | Tell Us About Your Project";
+const PAGE_DESC =
+  "Tell us about your project. Contact Dcodes Technologies for websites, custom software, ERP, mobile apps and digital marketing. Send a brief or call us.";
+
+// ⚠️ Real sales email confirm karo (href ma "sale@" hatu, screen par "sales@" hatu)
+const SALES_EMAIL = "sale@dcodestech.com";
+const PHONE_DISPLAY = "+91 6353 653 977";
+
+const safeJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ContactPage",
+      "@id": `${PAGE_URL}#page`,
+      name: "Contact Dcodes Technologies",
+      url: PAGE_URL,
+      about: { "@id": `${SITE}/#organization` },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE}/#organization`,
+      name: "Dcodes Technologies",
+      url: SITE,
+      logo: `${SITE}/logo.png`,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "B-203, Ganesh Glory 11",
+        addressLocality: "Ahmedabad",
+        addressRegion: "Gujarat",
+        addressCountry: "IN",
+      },
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          email: SALES_EMAIL,
+          telephone: "+91-6353-653-977",
+        },
+        {
+          "@type": "ContactPoint",
+          contactType: "customer service",
+          email: "info@dcodestech.com",
+        },
+        {
+          "@type": "ContactPoint",
+          contactType: "human resources",
+          email: "hr@dcodestech.com",
+        },
+      ],
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+        { "@type": "ListItem", position: 2, name: "Contact", item: PAGE_URL },
+      ],
+    },
+  ],
+};
+
+// ===== SEO: React 19 hoists these into <head> and they are server-rendered =====
+const seo = (
+  <>
+    <title>{PAGE_TITLE}</title>
+    <meta name="description" content={PAGE_DESC} />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <link rel="canonical" href={PAGE_URL} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={PAGE_URL} />
+    <meta property="og:site_name" content="Dcodes Technologies" />
+    <meta property="og:title" content="Contact Dcodes Technologies" />
+    <meta property="og:description" content="Tell us about your project and we will reply with next steps." />
+    <meta property="og:image" content={`${SITE}/og-contact.jpg`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Contact Dcodes Technologies" />
+    <meta name="twitter:description" content="Websites, custom software, ERP, mobile apps and digital marketing. Send us a brief." />
+    <meta name="twitter:image" content={`${SITE}/og-contact.jpg`} />
+
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
+    />
+  </>
+);
 
 // CAPTCHA Component
 const CaptchaComponent = ({ onValidate }: { onValidate: (isValid: boolean) => void }) => {
-  const [captchaText, setCaptchaText] = useState('');
-  const [userInput, setUserInput] = useState('');
+  const [captchaText, setCaptchaText] = useState("");
+  const [userInput, setUserInput] = useState("");
   const [isValid, setIsValid] = useState(false);
 
   const generateRandomString = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    let result = '';
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let result = "";
     for (let i = 0; i < 6; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -31,13 +122,14 @@ const CaptchaComponent = ({ onValidate }: { onValidate: (isValid: boolean) => vo
   const generateCaptcha = () => {
     const newCaptcha = generateRandomString();
     setCaptchaText(newCaptcha);
-    setUserInput('');
+    setUserInput("");
     setIsValid(false);
     onValidate(false);
   };
 
   useEffect(() => {
     generateCaptcha();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,19 +151,18 @@ const CaptchaComponent = ({ onValidate }: { onValidate: (isValid: boolean) => vo
         <div
           className="h-16 px-6 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center border border-white/20 min-w-[160px]"
           style={{
-            fontFamily: 'monospace',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#1e3a8a',
-            letterSpacing: '3px',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-            transform: 'rotate(-0deg)',
-            background: 'linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%)',
-            userSelect: 'none',
-            pointerEvents: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none',
+            fontFamily: "monospace",
+            fontSize: "20px",
+            fontWeight: "bold",
+            color: "#1e3a8a",
+            letterSpacing: "3px",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.1)",
+            background: "linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%)",
+            userSelect: "none",
+            pointerEvents: "none",
+            WebkitUserSelect: "none",
+            MozUserSelect: "none",
+            msUserSelect: "none",
           }}
           draggable="false"
           aria-label={`CAPTCHA security code: ${captchaText}`}
@@ -98,7 +189,7 @@ const CaptchaComponent = ({ onValidate }: { onValidate: (isValid: boolean) => vo
           value={userInput}
           onChange={handleInputChange}
           className={`w-full h-16 px-4 border rounded-xl bg-transparent text-white placeholder:text-white/30 font-normal focus:outline-none focus:ring-0 transition-all duration-300 ${
-            userInput && (isValid ? 'border-green-500/50' : 'border-red-500/50')
+            userInput && (isValid ? "border-green-500/50" : "border-red-500/50")
           }`}
           aria-label="CAPTCHA verification input"
           aria-describedby="captcha-description"
@@ -143,283 +234,6 @@ const ConnectPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCaptchaValid, setIsCaptchaValid] = useState(false);
 
-  // SEO Meta Tags - Adding dynamically with useEffect
-  useEffect(() => {
-    // Update document title
-    document.title = "Contact Web Development Company | Get a Quote – Dcodes Technologies";
-    
-    // Update or create meta description
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.setAttribute('name', 'description');
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.setAttribute('content', "Get in touch with Dcodes for web development, mobile apps, software solutions, digital marketing, or ERP services. Request a consultation or a quote today.");
-    
-    // Update or create keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute('content', "contact web development company, contact IT services company, software solution inquiry, mobile app development contact, digital marketing inquiry, web development quote, ERP consultation");
-    
-    // Update or create viewport
-    let metaViewport = document.querySelector('meta[name="viewport"]');
-    if (!metaViewport) {
-      metaViewport = document.createElement('meta');
-      metaViewport.setAttribute('name', 'viewport');
-      document.head.appendChild(metaViewport);
-    }
-    metaViewport.setAttribute('content', "width=device-width, initial-scale=1.0");
-    
-    // Update or create robots
-    let metaRobots = document.querySelector('meta[name="robots"]');
-    if (!metaRobots) {
-      metaRobots = document.createElement('meta');
-      metaRobots.setAttribute('name', 'robots');
-      document.head.appendChild(metaRobots);
-    }
-    metaRobots.setAttribute('content', "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
-    
-    // Update or create author
-    let metaAuthor = document.querySelector('meta[name="author"]');
-    if (!metaAuthor) {
-      metaAuthor = document.createElement('meta');
-      metaAuthor.setAttribute('name', 'author');
-      document.head.appendChild(metaAuthor);
-    }
-    metaAuthor.setAttribute('content', "Dcodes Technologies");
-    
-    // Update or create theme-color
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (!metaThemeColor) {
-      metaThemeColor = document.createElement('meta');
-      metaThemeColor.setAttribute('name', 'theme-color');
-      document.head.appendChild(metaThemeColor);
-    }
-    metaThemeColor.setAttribute('content', "#000000");
-    
-    // Open Graph Tags
-    let ogTitle = document.querySelector('meta[property="og:title"]');
-    if (!ogTitle) {
-      ogTitle = document.createElement('meta');
-      ogTitle.setAttribute('property', 'og:title');
-      document.head.appendChild(ogTitle);
-    }
-    ogTitle.setAttribute('content', "Contact Us | Get in Touch | Dcodes Technologies");
-    
-    let ogDescription = document.querySelector('meta[property="og:description"]');
-    if (!ogDescription) {
-      ogDescription = document.createElement('meta');
-      ogDescription.setAttribute('property', 'og:description');
-      document.head.appendChild(ogDescription);
-    }
-    ogDescription.setAttribute('content', "Ready to bring your vision to life? Share your project details and let's create something extraordinary together.");
-    
-    let ogType = document.querySelector('meta[property="og:type"]');
-    if (!ogType) {
-      ogType = document.createElement('meta');
-      ogType.setAttribute('property', 'og:type');
-      document.head.appendChild(ogType);
-    }
-    ogType.setAttribute('content', "website");
-    
-    let ogUrl = document.querySelector('meta[property="og:url"]');
-    if (!ogUrl) {
-      ogUrl = document.createElement('meta');
-      ogUrl.setAttribute('property', 'og:url');
-      document.head.appendChild(ogUrl);
-    }
-    ogUrl.setAttribute('content', "https://dcodes.com/connect");
-    
-    let ogSiteName = document.querySelector('meta[property="og:site_name"]');
-    if (!ogSiteName) {
-      ogSiteName = document.createElement('meta');
-      ogSiteName.setAttribute('property', 'og:site_name');
-      document.head.appendChild(ogSiteName);
-    }
-    ogSiteName.setAttribute('content', "Dcodes Technologies");
-    
-    let ogImage = document.querySelector('meta[property="og:image"]');
-    if (!ogImage) {
-      ogImage = document.createElement('meta');
-      ogImage.setAttribute('property', 'og:image');
-      document.head.appendChild(ogImage);
-    }
-    ogImage.setAttribute('content', "https://dcodes.com/og-image-contact.jpg");
-    
-    // Twitter Card Tags
-    let twitterCard = document.querySelector('meta[name="twitter:card"]');
-    if (!twitterCard) {
-      twitterCard = document.createElement('meta');
-      twitterCard.setAttribute('name', 'twitter:card');
-      document.head.appendChild(twitterCard);
-    }
-    twitterCard.setAttribute('content', "summary_large_image");
-    
-    let twitterTitle = document.querySelector('meta[name="twitter:title"]');
-    if (!twitterTitle) {
-      twitterTitle = document.createElement('meta');
-      twitterTitle.setAttribute('name', 'twitter:title');
-      document.head.appendChild(twitterTitle);
-    }
-    twitterTitle.setAttribute('content', "Contact Dcodes Technologies");
-    
-    let twitterDescription = document.querySelector('meta[name="twitter:description"]');
-    if (!twitterDescription) {
-      twitterDescription = document.createElement('meta');
-      twitterDescription.setAttribute('name', 'twitter:description');
-      document.head.appendChild(twitterDescription);
-    }
-    twitterDescription.setAttribute('content', "Get in touch for web development, mobile apps, and digital marketing services.");
-    
-    let twitterImage = document.querySelector('meta[name="twitter:image"]');
-    if (!twitterImage) {
-      twitterImage = document.createElement('meta');
-      twitterImage.setAttribute('name', 'twitter:image');
-      document.head.appendChild(twitterImage);
-    }
-    twitterImage.setAttribute('content', "https://dcodes.com/twitter-card-contact.jpg");
-    
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', "https://dcodes.com/connect");
-    
-    // Geo tags
-    let geoRegion = document.querySelector('meta[name="geo.region"]');
-    if (!geoRegion) {
-      geoRegion = document.createElement('meta');
-      geoRegion.setAttribute('name', 'geo.region');
-      document.head.appendChild(geoRegion);
-    }
-    geoRegion.setAttribute('content', "IN-GJ");
-    
-    let geoPlacename = document.querySelector('meta[name="geo.placename"]');
-    if (!geoPlacename) {
-      geoPlacename = document.createElement('meta');
-      geoPlacename.setAttribute('name', 'geo.placename');
-      document.head.appendChild(geoPlacename);
-    }
-    geoPlacename.setAttribute('content', "Gujarat");
-    
-    // Language
-    let metaLanguage = document.querySelector('meta[http-equiv="content-language"]');
-    if (!metaLanguage) {
-      metaLanguage = document.createElement('meta');
-      metaLanguage.setAttribute('http-equiv', 'content-language');
-      document.head.appendChild(metaLanguage);
-    }
-    metaLanguage.setAttribute('content', "en");
-    
-    // Structured Data for Contact Page
-    const structuredDataContact = {
-      "@context": "https://schema.org",
-      "@type": "ContactPage",
-      "name": "Contact Dcodes Technologies",
-      "description": "Contact form for web development, mobile app development, UI/UX design, SEO, and digital marketing services",
-      "url": "https://dcodes.com/connect",
-      "mainEntity": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "telephone": "+91-6353-653-977",
-        "email": "sale@dcodestech.com",
-        "availableLanguage": ["English", "Gujarati", "Hindi"],
-        "areaServed": {
-          "@type": "Country",
-          "name": "India"
-        }
-      }
-    };
-    
-    let scriptContact = document.querySelector('#structured-data-contact');
-    if (!scriptContact) {
-      scriptContact = document.createElement('script');
-      scriptContact.id = 'structured-data-contact';
-      scriptContact.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptContact);
-    }
-    scriptContact.textContent = JSON.stringify(structuredDataContact);
-    
-    // Breadcrumb Structured Data
-    const structuredDataBreadcrumb = {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://dcodes.com"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Contact",
-          "item": "https://dcodes.com/connect"
-        }
-      ]
-    };
-    
-    let scriptBreadcrumb = document.querySelector('#structured-data-breadcrumb');
-    if (!scriptBreadcrumb) {
-      scriptBreadcrumb = document.createElement('script');
-      scriptBreadcrumb.id = 'structured-data-breadcrumb';
-      scriptBreadcrumb.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptBreadcrumb);
-    }
-    scriptBreadcrumb.textContent = JSON.stringify(structuredDataBreadcrumb);
-    
-    // Organization Structured Data
-    const structuredDataOrg = {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Dcodes Technologies",
-      "url": "https://dcodes.com",
-      "logo": "https://dcodes.com/logo.png",
-      "contactPoint": [
-        {
-          "@type": "ContactPoint",
-          "contactType": "sales",
-          "email": "sale@dcodestech.com",
-          "telephone": "+91-6353-653-977"
-        },
-        {
-          "@type": "ContactPoint",
-          "contactType": "customer service",
-          "email": "info@dcodestech.com"
-        },
-        {
-          "@type": "ContactPoint",
-          "contactType": "human resources",
-          "email": "hr@dcodestech.com"
-        }
-      ],
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "India",
-        "addressRegion": "Gujarat"
-      }
-    };
-    
-    let scriptOrg = document.querySelector('#structured-data-org');
-    if (!scriptOrg) {
-      scriptOrg = document.createElement('script');
-      scriptOrg.id = 'structured-data-org';
-      scriptOrg.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(scriptOrg);
-    }
-    scriptOrg.textContent = JSON.stringify(structuredDataOrg);
-    
-  }, []);
-
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -443,10 +257,10 @@ const ConnectPage = () => {
     if (!isCaptchaValid) {
       toast.error("Please complete the security verification", {
         style: {
-          background: '#000',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)'
-        }
+          background: "#000",
+          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.1)",
+        },
       });
       return;
     }
@@ -457,15 +271,15 @@ const ConnectPage = () => {
       await addDoc(collection(db, "connectRequests"), {
         ...formData,
         createdAt: Timestamp.now(),
-        ipAddress: 'client-submitted',
+        ipAddress: "client-submitted",
         userAgent: navigator.userAgent,
       });
       toast.success("Your request has been submitted successfully", {
         style: {
-          background: '#000',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)'
-        }
+          background: "#000",
+          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.1)",
+        },
       });
       setIsSubmitted(true);
       setTimeout(() => {
@@ -485,10 +299,10 @@ const ConnectPage = () => {
       console.error("Error adding document:", error);
       toast.error("Failed to submit request. Please try again.", {
         style: {
-          background: '#000',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)'
-        }
+          background: "#000",
+          color: "#fff",
+          border: "1px solid rgba(255,255,255,0.1)",
+        },
       });
     } finally {
       setIsSubmitting(false);
@@ -517,7 +331,8 @@ const ConnectPage = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      <main className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+        {seo}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02)_0%,transparent_50%)]" />
 
         <div className="relative z-10 text-center max-w-lg mx-auto">
@@ -525,9 +340,9 @@ const ConnectPage = () => {
             <div className="w-24 h-24 mx-auto mb-8 border border-white/10 rounded-full flex items-center justify-center backdrop-blur-sm bg-white/5">
               <Check className="w-12 h-12 text-white" />
             </div>
-            <h2 className="text-4xl font-extralight text-white mb-6 tracking-[0.2em]">
+            <h1 className="text-4xl font-extralight text-white mb-6 tracking-[0.2em]">
               MESSAGE SENT
-            </h2>
+            </h1>
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-8" />
             <p className="text-white/60 font-normal text-lg leading-relaxed">
               Thank you for reaching out. We'll review your request and respond within 24 hours.
@@ -544,12 +359,14 @@ const ConnectPage = () => {
             </button>
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen mt-16 bg-black relative overflow-hidden">
+    <main className="min-h-screen mt-16 bg-black relative overflow-hidden">
+      {seo}
+
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.03)_0%,transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.02)_0%,transparent_50%)]" />
@@ -559,15 +376,16 @@ const ConnectPage = () => {
         <div className="max-w-4xl mx-auto">
 
           {/* Header */}
-          <div className="text-center mb-16 lg:mb-24">
+          <header className="text-center mb-16 lg:mb-24">
             <h1 className="text-6xl lg:text-8xl font-extralight text-white mb-8 tracking-[0.3em]">
               CONNECT
+              <span className="sr-only"> with Dcodes Technologies</span>
             </h1>
             <div className="w-32 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-12" />
             <p className="text-white/60 font-normal text-lg tracking-wide max-w-2xl mx-auto leading-relaxed">
               Ready to bring your vision to life? Share your project details and let's create something extraordinary together.
             </p>
-          </div>
+          </header>
 
           {/* Form */}
           <div className="max-w-3xl mx-auto">
@@ -621,12 +439,12 @@ const ConnectPage = () => {
 
                 </div>
 
-                {/* You're Here For - full width, radios on the same line as the label */}
+                {/* You're Here For */}
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center gap-x-10 gap-y-3">
-                    <label className="text-white/80 font-normal text-sm tracking-[0.2em] uppercase">
+                    <span className="text-white/80 font-normal text-sm tracking-[0.2em] uppercase">
                       You're Here For
-                    </label>
+                    </span>
 
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <span className="relative flex items-center justify-center w-5 h-5">
@@ -669,7 +487,7 @@ const ConnectPage = () => {
                     </label>
                   </div>
 
-                  {/* Single dropdown - always visible; disabled with placeholder until Service/Product is chosen */}
+                  {/* Single dropdown - disabled until Service/Product is chosen */}
                   <select
                     value={formData.inquiryType === "service" ? formData.service : formData.inquiryType === "product" ? formData.product : ""}
                     onChange={(e) => handleChange(formData.inquiryType === "product" ? "product" : "service", e.target.value)}
@@ -694,7 +512,7 @@ const ConnectPage = () => {
                   </select>
                 </div>
 
-                {/* Phone Field - full width, its own row */}
+                {/* Phone Field */}
                 <div className="space-y-4">
                   <label htmlFor="mobile" className="text-white/80 font-normal text-sm tracking-[0.2em] uppercase">
                     Phone Number
@@ -744,8 +562,8 @@ const ConnectPage = () => {
                     disabled={isSubmitting || !isCaptchaValid}
                     className={`w-full font-normal tracking-[0.3em] uppercase transition-all duration-500 h-16 group relative overflow-hidden rounded-xl ${
                       isCaptchaValid
-                        ? 'bg-white hover:bg-white/95 text-black'
-                        : 'bg-white/20 text-white/50 cursor-not-allowed'
+                        ? "bg-white hover:bg-white/95 text-black"
+                        : "bg-white/20 text-white/50 cursor-not-allowed"
                     }`}
                     aria-label={isSubmitting ? "Sending your message..." : "Submit your contact form"}
                     aria-busy={isSubmitting}
@@ -780,9 +598,9 @@ const ConnectPage = () => {
 
                 {/* Direct Contact */}
                 <div className="space-y-8">
-                  <h3 className="text-2xl font-extralight text-white tracking-[0.2em] mb-8">
+                  <h2 className="text-2xl font-extralight text-white tracking-[0.2em] mb-8">
                     DIRECT CONTACT
-                  </h3>
+                  </h2>
 
                   {/* Phone/WhatsApp */}
                   <div className="group">
@@ -797,9 +615,9 @@ const ConnectPage = () => {
                         <a
                           href="tel:+916353653977"
                           className="text-white font-normal text-lg hover:text-white/80 transition-colors duration-300"
-                          aria-label="Call Dcodes Technologies at +91 6353 653 977"
+                          aria-label={`Call Dcodes Technologies at ${PHONE_DISPLAY}`}
                         >
-                          +91 6353 653 977
+                          {PHONE_DISPLAY}
                         </a>
                       </div>
                     </div>
@@ -851,9 +669,9 @@ const ConnectPage = () => {
 
                 {/* Email Contacts */}
                 <div className="space-y-8">
-                  <h3 className="text-2xl font-extralight text-white tracking-[0.2em] mb-8">
+                  <h2 className="text-2xl font-extralight text-white tracking-[0.2em] mb-8">
                     EMAIL CONTACT
-                  </h3>
+                  </h2>
 
                   <div className="space-y-6">
                     {/* Sales */}
@@ -867,11 +685,11 @@ const ConnectPage = () => {
                             Sales Inquiries
                           </p>
                           <a
-                            href="mailto:sale@dcodestech.com"
+                            href={`mailto:${SALES_EMAIL}`}
                             className="text-white font-normal hover:text-white/80 transition-colors duration-300"
-                            aria-label="Email sales department at sale@dcodestech.com"
+                            aria-label={`Email sales department at ${SALES_EMAIL}`}
                           >
-                            sales@dcodestech.com
+                            {SALES_EMAIL}
                           </a>
                         </div>
                       </div>
@@ -937,7 +755,7 @@ const ConnectPage = () => {
               </p>
               <div className="w-24 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mx-auto" aria-hidden="true"></div>
               <p className="text-white/20 text-xs font-extralight">
-                DCodes Tech Solutions
+                Dcodes Technologies
               </p>
             </div>
           </div>
@@ -946,7 +764,7 @@ const ConnectPage = () => {
         <MapComponent />
 
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -13,7 +13,8 @@ import {
   getDocs,
 } from "firebase/firestore";
 import Link from "next/link";
-import Head from 'next/head';
+
+const SITE = "https://www.dcodestech.com";
 
 interface Blog {
   id: string;
@@ -72,10 +73,13 @@ const cleanHtml = (html: string): string => {
   cleaned = cleaned.replace(/<br>/g, "<br />");
   cleaned = cleaned.replace(/<hr>/g, "<hr />");
 
+  // The page title is the only H1 - demote any H1 inside the content to H2
+  cleaned = cleaned.replace(/<h1(\s[^>]*)?>/g, "<h2$1>").replace(/<\/h1>/g, "</h2>");
+
   return cleaned;
 };
 
-// Strip HTML tags -> plain text (for meta description / keywords only)
+// Strip HTML tags -> plain text (for meta description / previews only)
 const stripHtml = (html: string): string => {
   if (!html) return "";
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -99,7 +103,7 @@ const injectHeadingIdsAndBuildToc = (html: string): { html: string; toc: TocItem
   let index = 0;
 
   const withIds = html.replace(
-    /<(h2|h3)([^>]*)>(.*?)<\/\1>/g,
+    /<(h2|h3)([^>]*)>([\s\S]*?)<\/\1>/g,
     (_match, tag: string, attrs: string, inner: string) => {
       const plainText = inner.replace(/<[^>]*>/g, "").trim();
       if (!plainText) return `<${tag}${attrs}>${inner}</${tag}>`;
@@ -114,6 +118,22 @@ const injectHeadingIdsAndBuildToc = (html: string): { html: string; toc: TocItem
 
   return { html: withIds, toc };
 };
+
+// Meta description: first sentences of the plain text, max ~155 chars
+const getMetaDescription = (content: string): string => {
+  const plain = stripHtml(content);
+  if (plain.length <= 155) return plain;
+  const cut = plain.substring(0, 155);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 100 ? cut.substring(0, lastSpace) : cut).trim() + "...";
+};
+
+const toDate = (createdAt: any): Date | null => {
+  const d = createdAt?.toDate?.();
+  return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+};
+
+const safeJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
 
 export default function BlogDetailPage() {
   const params = useParams();
@@ -135,7 +155,7 @@ export default function BlogDetailPage() {
         const blogData = blogSnapshot.data();
         setBlog({
           id: blogSnapshot.id,
-          ...blogData
+          ...blogData,
         } as Blog);
       } else {
         setError("Blog post not found");
@@ -152,9 +172,10 @@ export default function BlogDetailPage() {
     if (blogId) {
       fetchBlog();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blogId]);
 
-  // Trending posts — most recent posts, excluding the one being viewed
+  // Latest posts, excluding the one being viewed
   useEffect(() => {
     const fetchTrending = async () => {
       try {
@@ -170,14 +191,14 @@ export default function BlogDetailPage() {
           .slice(0, 4);
         setTrendingPosts(posts);
       } catch (err) {
-        console.error("Error fetching trending posts:", err);
+        console.error("Error fetching latest posts:", err);
       }
     };
 
     if (blogId) fetchTrending();
   }, [blogId]);
 
-  // Recommended blogs — same category first, filled up with recent posts
+  // Recommended blogs - same category first, filled up with recent posts
   useEffect(() => {
     const fetchRecommended = async () => {
       if (!blog) return;
@@ -220,172 +241,144 @@ export default function BlogDetailPage() {
     fetchRecommended();
   }, [blog]);
 
-  // Function to extract first few sentences for meta description
-  const getMetaDescription = (content: string) => {
-    const plain = stripHtml(content);
-    const sentences = plain.split(/[.!?]+/);
-    const firstTwoSentences = sentences.slice(0, 2).join('. ');
-    return firstTwoSentences.length > 150
-      ? firstTwoSentences.substring(0, 150) + '...'
-      : firstTwoSentences;
-  };
-
-  // Function to extract keywords from content
-  const extractKeywords = (content: string, title: string) => {
-    const plain = stripHtml(content);
-    const words = (title + ' ' + plain).toLowerCase().split(/\W+/);
-    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being']);
-
-    const wordFreq: { [key: string]: number } = {};
-    words.forEach(word => {
-      if (word.length > 3 && !stopWords.has(word)) {
-        wordFreq[word] = (wordFreq[word] || 0) + 1;
-      }
-    });
-
-    const sortedWords = Object.keys(wordFreq).sort((a, b) => wordFreq[b] - wordFreq[a]);
-    return sortedWords.slice(0, 10);
-  };
-
+  // ---------- Loading (NO noindex here: this is what the initial HTML contains) ----------
   if (loading) {
     return (
-      <>
-        <Head>
-          <title>Loading Blog Post | Dcodes Technologies Blog</title>
-          <meta name="robots" content="noindex, nofollow" />
-        </Head>
-        <div className="min-h-screen bg-black text-white">
-          <div className="px-6 mt-20 pt-16 pb-12 max-w-4xl mx-auto">
-            <div className="animate-pulse">
-              <div className="h-6 w-32 bg-gray-800 rounded mb-8"></div>
-              <div className="flex flex-wrap items-center gap-6 mb-8">
-                <div className="h-8 w-24 bg-gray-800 rounded"></div>
-                <div className="h-4 w-20 bg-gray-800 rounded"></div>
-                <div className="h-4 w-32 bg-gray-800 rounded"></div>
-              </div>
-              <div className="h-12 bg-gray-800 rounded w-3/4 mb-8"></div>
-              <div className="h-64 bg-gray-800 rounded mb-12"></div>
-              <div className="space-y-4">
-                <div className="h-4 bg-gray-800 rounded"></div>
-                <div className="h-4 bg-gray-800 rounded w-5/6"></div>
-                <div className="h-4 bg-gray-800 rounded w-4/6"></div>
-                <div className="h-4 bg-gray-800 rounded"></div>
-                <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-              </div>
+      <main className="min-h-screen bg-black text-white">
+        <title>Dcodes Technologies Blog</title>
+        <div className="px-6 mt-20 pt-16 pb-12 max-w-4xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-6 w-32 bg-gray-800 rounded mb-8"></div>
+            <div className="flex flex-wrap items-center gap-6 mb-8">
+              <div className="h-8 w-24 bg-gray-800 rounded"></div>
+              <div className="h-4 w-20 bg-gray-800 rounded"></div>
+              <div className="h-4 w-32 bg-gray-800 rounded"></div>
+            </div>
+            <div className="h-12 bg-gray-800 rounded w-3/4 mb-8"></div>
+            <div className="h-64 bg-gray-800 rounded mb-12"></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-800 rounded"></div>
+              <div className="h-4 bg-gray-800 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-800 rounded w-4/6"></div>
+              <div className="h-4 bg-gray-800 rounded"></div>
+              <div className="h-4 bg-gray-800 rounded w-3/4"></div>
             </div>
           </div>
         </div>
-      </>
+      </main>
     );
   }
 
+  // ---------- Not found ----------
   if (error || !blog) {
     return (
-      <>
-        <Head>
-          <title>Blog Post Not Found | Dcodes Technologies</title>
-          <meta name="description" content="The requested blog post could not be found. Explore our other technology and development articles." />
-          <meta name="robots" content="noindex, nofollow" />
-        </Head>
-        <div className="min-h-screen bg-black text-white">
-          <div className="px-6 mt-20 pt-16 pb-12 max-w-4xl mx-auto text-center">
-            <div className="mb-8">
-              <p className="text-6xl mb-4">404</p>
-              <div className="w-12 h-px bg-white mx-auto opacity-50"></div>
-            </div>
+      <main className="min-h-screen bg-black text-white">
+        <title>Blog Post Not Found | Dcodes Technologies</title>
+        <meta name="robots" content="noindex, nofollow" />
 
-            <h1 className="text-2xl md:text-3xl font-normal mb-6">
-              {error || "Blog post not found"}
-            </h1>
-
-            <p className="text-gray-400 mb-8 max-w-md mx-auto">
-              The blog post you're looking for doesn't exist or may have been moved.
-            </p>
-
-            <Link
-              href="/blogs"
-              className="inline-flex items-center px-6 py-3 border border-white/20 text-white font-normal hover:border-white/40 hover:bg-white/5 transition-all duration-300"
-              aria-label="Return to all blog posts"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Blogs
-            </Link>
+        <div className="px-6 mt-20 pt-16 pb-12 max-w-4xl mx-auto text-center">
+          <div className="mb-8">
+            <p className="text-6xl mb-4">404</p>
+            <div className="w-12 h-px bg-white mx-auto opacity-50"></div>
           </div>
+
+          <h1 className="text-2xl md:text-3xl font-normal mb-6">
+            {error || "Blog post not found"}
+          </h1>
+
+          <p className="text-gray-400 mb-8 max-w-md mx-auto">
+            The blog post you're looking for doesn't exist or may have been moved.
+          </p>
+
+          <Link
+            href="/Blog"
+            className="inline-flex items-center px-6 py-3 border border-white/20 text-white font-normal hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+            aria-label="Return to all blog posts"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Blogs
+          </Link>
         </div>
-      </>
+      </main>
     );
   }
 
-  // Prepare metadata
+  // ---------- Prepare metadata ----------
   const metaDescription = blog.metaDescription || getMetaDescription(blog.content);
-  const keywords = blog.keywords || extractKeywords(blog.content, blog.title);
   const pageTitle = `${blog.title} | Dcodes Technologies Blog`;
-  const canonicalUrl = `https://dcodes.com/blog/${blogId}`;
+  const canonicalUrl = `${SITE}/Blog/${blog.id}`;
   const author = blog.author || "Dcodes Technologies Team";
-  const publishDate = blog.createdAt?.toDate ? blog.createdAt.toDate().toISOString() : new Date().toISOString();
+  const dateObj = toDate(blog.createdAt);
+  const publishDate = dateObj ? dateObj.toISOString() : null;
 
   const { html: renderedContent, toc } = injectHeadingIdsAndBuildToc(cleanHtml(blog.content));
 
+  const blogPostingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: blog.title,
+    description: metaDescription,
+    ...(blog.imageUrl ? { image: blog.imageUrl } : {}),
+    ...(publishDate ? { datePublished: publishDate, dateModified: publishDate } : {}),
+    ...(blog.keywords?.length ? { keywords: blog.keywords.join(", ") } : {}),
+    ...(blog.category ? { articleSection: blog.category } : {}),
+    author: { "@type": "Person", name: author },
+    publisher: {
+      "@type": "Organization",
+      name: "Dcodes Technologies",
+      url: SITE,
+      logo: { "@type": "ImageObject", url: `${SITE}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE}/Blog` },
+      { "@type": "ListItem", position: 3, name: blog.title, item: canonicalUrl },
+    ],
+  };
+
   return (
     <>
-      {/* SEO Meta Tags and Structured Data */}
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={metaDescription} />
-        <meta name="keywords" content={keywords.join(', ')} />
+      {/* ===== SEO: React 19 hoists these into <head> ===== */}
+      <title>{pageTitle}</title>
+      <meta name="description" content={metaDescription} />
+      <meta
+        name="robots"
+        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      />
+      <meta name="author" content={author} />
+      <link rel="canonical" href={canonicalUrl} />
 
-        <meta property="og:title" content={blog.title} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:image" content={blog.imageUrl} />
-        <meta property="og:site_name" content="Dcodes Technologies Blog" />
-        <meta property="article:published_time" content={publishDate} />
-        {blog.author && <meta property="article:author" content={blog.author} />}
-        {blog.category && <meta property="article:section" content={blog.category} />}
+      <meta property="og:type" content="article" />
+      <meta property="og:title" content={blog.title} />
+      <meta property="og:description" content={metaDescription} />
+      <meta property="og:url" content={canonicalUrl} />
+      {blog.imageUrl && <meta property="og:image" content={blog.imageUrl} />}
+      <meta property="og:site_name" content="Dcodes Technologies" />
+      {publishDate && <meta property="article:published_time" content={publishDate} />}
+      {blog.author && <meta property="article:author" content={blog.author} />}
+      {blog.category && <meta property="article:section" content={blog.category} />}
 
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={blog.title} />
-        <meta name="twitter:description" content={metaDescription} />
-        <meta name="twitter:image" content={blog.imageUrl} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={blog.title} />
+      <meta name="twitter:description" content={metaDescription} />
+      {blog.imageUrl && <meta name="twitter:image" content={blog.imageUrl} />}
 
-        <link rel="canonical" href={canonicalUrl} />
-
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": blog.title,
-            "description": metaDescription,
-            "image": blog.imageUrl,
-            "datePublished": publishDate,
-            "dateModified": publishDate,
-            "author": {
-              "@type": "Person",
-              "name": author
-            },
-            "publisher": {
-              "@type": "Organization",
-              "name": "Dcodes Technologies",
-              "logo": {
-                "@type": "ImageObject",
-                "url": "https://dcodes.com/logo.png"
-              }
-            },
-            "mainEntityOfPage": {
-              "@type": "WebPage",
-              "@id": canonicalUrl
-            }
-          })}
-        </script>
-
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-        <meta name="author" content={author} />
-        <meta name="theme-color" content="#000000" />
-      </Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJson(blogPostingJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJson(breadcrumbJsonLd) }}
+      />
 
       <div className="min-h-screen bg-black text-white">
         {/* Back Navigation */}
@@ -395,7 +388,7 @@ export default function BlogDetailPage() {
             className="inline-flex items-center text-gray-400 hover:text-white transition-colors duration-300 mb-8 group"
             aria-label="Return to all blog posts"
           >
-            <svg className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to all stories
@@ -403,57 +396,59 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Blog Header (full width) */}
-        <div className="px-6 pb-8 max-w-7xl mx-auto">
+        <header className="px-6 pb-8 max-w-7xl mx-auto">
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400 mb-8">
             {blog.category && (
-              <span className="px-3 py-1 border border-gray-600 text-gray-400 font-normal" itemProp="articleSection">
+              <span className="px-3 py-1 border border-gray-600 text-gray-400 font-normal">
                 {blog.category}
               </span>
             )}
             {blog.readTime && <span>{blog.readTime} read</span>}
-            {blog.author && <span itemProp="author">{blog.author}</span>}
-            {blog.createdAt && (
-              <time dateTime={publishDate}>
-                {blog.createdAt.toDate ? blog.createdAt.toDate().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }) : ''}
+            {blog.author && <span>{blog.author}</span>}
+            {dateObj && (
+              <time dateTime={publishDate!}>
+                {dateObj.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
               </time>
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-8 text-white" itemProp="headline">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-8 text-white">
             {blog.title}
           </h1>
-        </div>
+        </header>
 
         {/* Content + Sidebar */}
         <div className="px-6 pb-12 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
             {/* Main content */}
             <main className="lg:col-span-3">
-              {/* Featured Image - compact, aligned with sidebar top */}
-              <div className="relative mb-8 overflow-hidden rounded-lg">
-                <div className="h-56 sm:h-64 md:h-72 bg-gray-900 relative">
-                  <img
-                    src={blog.imageUrl}
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                    itemProp="image"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              {/* Featured Image */}
+              {blog.imageUrl && (
+                <div className="relative mb-8 overflow-hidden rounded-lg">
+                  <div className="h-56 sm:h-64 md:h-72 bg-gray-900 relative">
+                    <img
+                      src={blog.imageUrl}
+                      alt={blog.title}
+                      className="w-full h-full object-cover"
+                      fetchPriority="high"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" aria-hidden="true"></div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <article className="blog-article" itemProp="articleBody">
+              <article className="blog-article">
                 <div dangerouslySetInnerHTML={{ __html: renderedContent }} />
               </article>
 
               {/* Links Section */}
               {blog.links && blog.links.length > 0 && (
                 <div className="mt-16 pt-8 border-t border-gray-800">
-                  <h3 className="text-xl font-semibold mb-6 text-white">Related Links</h3>
+                  <h2 className="text-xl font-semibold mb-6 text-white">Related Links</h2>
                   <div className="grid gap-4">
                     {blog.links.map((link, index) => (
                       <a
@@ -465,7 +460,7 @@ export default function BlogDetailPage() {
                         aria-label={`Read more about ${link.name}`}
                       >
                         <div className="flex items-center space-x-4">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                          <div className="w-2 h-2 bg-white rounded-full" aria-hidden="true"></div>
                           <span className="text-white font-normal group-hover:text-gray-300 transition-colors duration-300">
                             {link.name}
                           </span>
@@ -485,32 +480,30 @@ export default function BlogDetailPage() {
                 </div>
               )}
 
-              {/* Navigation for SEO */}
-              <nav className="mt-16 pt-8 border-t border-gray-800">
-                <div className="text-center">
-                  <p className="text-gray-400 mb-6 font-normal">Enjoyed this story?</p>
-                  <Link
-                    href="/Blog"
-                    className="inline-flex items-center px-8 py-3 border border-white/20 text-white font-normal hover:border-white/40 hover:bg-white/5 transition-all duration-300 group"
-                    aria-label="Explore more blog posts from Dcodes Technologies"
-                  >
-                    <svg className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Explore more stories
-                  </Link>
-                </div>
-              </nav>
+              {/* Back to blog */}
+              <div className="mt-16 pt-8 border-t border-gray-800 text-center">
+                <p className="text-gray-400 mb-6 font-normal">Enjoyed this story?</p>
+                <Link
+                  href="/Blog"
+                  className="inline-flex items-center px-8 py-3 border border-white/20 text-white font-normal hover:border-white/40 hover:bg-white/5 transition-all duration-300 group"
+                  aria-label="Explore more blog posts from Dcodes Technologies"
+                >
+                  <svg className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Explore more stories
+                </Link>
+              </div>
             </main>
 
-            {/* Sidebar: 1) Table of Contents 2) CTA 3) Trending Posts */}
+            {/* Sidebar: 1) Table of Contents 2) CTA 3) Latest Posts */}
             <aside className="lg:col-span-1">
               <div className="space-y-6 lg:sticky lg:top-24">
                 {/* 1. Table of Contents */}
                 {toc.length > 0 && (
                   <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
-                    <h3 className="text-lg font-semibold mb-4 text-white">Table of Contents</h3>
-                    <nav>
+                    <h2 className="text-lg font-semibold mb-4 text-white">Table of Contents</h2>
+                    <nav aria-label="Table of contents">
                       <ul className="space-y-2">
                         {toc.map((item) => (
                           <li key={item.id} className={item.level === 3 ? "pl-4" : ""}>
@@ -529,7 +522,7 @@ export default function BlogDetailPage() {
 
                 {/* 2. CTA */}
                 <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
-                  <h3 className="text-lg font-semibold mb-2 text-white">Have a project in mind?</h3>
+                  <h2 className="text-lg font-semibold mb-2 text-white">Have a project in mind?</h2>
                   <p className="text-gray-400 text-sm mb-5">
                     Let's talk about how Dcodes Technologies can help you build it.
                   </p>
@@ -542,10 +535,10 @@ export default function BlogDetailPage() {
                   </Link>
                 </div>
 
-                {/* 3. Trending Posts */}
+                {/* 3. Latest Posts */}
                 {trendingPosts.length > 0 && (
                   <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
-                    <h3 className="text-lg font-semibold mb-4 text-white">Trending Posts</h3>
+                    <h2 className="text-lg font-semibold mb-4 text-white">Latest Posts</h2>
                     <div className="space-y-4">
                       {trendingPosts.map((post) => (
                         <Link key={post.id} href={`/Blog/${post.id}`} className="block">
@@ -561,9 +554,9 @@ export default function BlogDetailPage() {
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium text-white group-hover:text-gray-300 transition-colors line-clamp-2">
+                              <h3 className="text-sm font-medium text-white group-hover:text-gray-300 transition-colors line-clamp-2">
                                 {post.title}
-                              </h4>
+                              </h3>
                               {post.readTime && (
                                 <p className="text-xs text-gray-400 mt-1">{post.readTime} read</p>
                               )}
@@ -580,19 +573,21 @@ export default function BlogDetailPage() {
 
           {/* Recommended Blogs */}
           {recommendedBlogs.length > 0 && (
-            <div className="mt-20 pt-12 border-t border-gray-800">
+            <section className="mt-20 pt-12 border-t border-gray-800" aria-label="Recommended posts">
               <h2 className="text-2xl md:text-3xl font-normal mb-8 text-white">Recommended for you</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recommendedBlogs.map((rec) => (
                   <Link key={rec.id} href={`/Blog/${rec.id}`} className="block group">
                     <article className="border border-gray-800 rounded-lg overflow-hidden hover:border-gray-600 transition-all duration-300">
                       <div className="aspect-[16/9] bg-gray-900 relative overflow-hidden">
-                        <img
-                          src={rec.imageUrl}
-                          alt={rec.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
+                        {rec.imageUrl && (
+                          <img
+                            src={rec.imageUrl}
+                            alt={rec.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        )}
                       </div>
                       <div className="p-5">
                         {rec.category && (
@@ -604,28 +599,15 @@ export default function BlogDetailPage() {
                           {rec.title}
                         </h3>
                         <p className="text-sm text-gray-400 mt-2 line-clamp-2">
-                          {stripHtml(rec.content).substring(0, 100)}...
+                          {getMetaDescription(rec.content)}
                         </p>
                       </div>
                     </article>
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
           )}
-
-          {/* Schema.org Breadcrumb */}
-          <script type="application/ld+json">
-            {JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              "itemListElement": [
-                { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://dcodes.com" },
-                { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://dcodes.com/blog" },
-                { "@type": "ListItem", "position": 3, "name": blog.title, "item": canonicalUrl }
-              ]
-            })}
-          </script>
         </div>
       </div>
 

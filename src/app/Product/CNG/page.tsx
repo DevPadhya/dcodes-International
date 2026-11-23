@@ -1,14 +1,24 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
     Users, MessageSquare, Calendar, FileText,
     BarChart3, CreditCard, Settings, Bell,
-    Target, Shield, Zap, TrendingUp,
-    Heart, Globe, Clock, Star
+    TrendingUp,
 } from "lucide-react";
-import SoftAurora from './SoftAurora';
+import SoftAurora from "./SoftAurora";
+
+const SITE = "https://www.dcodestech.com";
+// ⚠️ Aa page nu real route lakho (jem ke "/Product/cng")
+const PAGE_PATH = "/Product/cng";
+const PAGE_URL = `${SITE}${PAGE_PATH}`;
+const PAGE_TITLE = "Smart CNG Renewal & Management System | Dcodes Technologies";
+const PAGE_DESC =
+    "Manage CNG kit renewals, customers, inventory, sales and service scheduling from one dashboard. A CRM and ERP system built by Dcodes Technologies.";
+
+const safeJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
 
 // ============== FEATURES DATA ==============
 const features = [
@@ -44,7 +54,7 @@ const features = [
         color: "bg-blue-500",
         icon: <Settings className="w-6 h-6" />
     },
-    {   
+    {
         id: 5,
         title: "Service Management",
         description: "Schedule installations, track service history, and manage technician assignments.",
@@ -164,6 +174,45 @@ const faqs = [
     }
 ];
 
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "SoftwareApplication",
+            "@id": `${PAGE_URL}#app`,
+            name: "Smart CNG Kit Renewal & Management System",
+            url: PAGE_URL,
+            description:
+                "CRM and ERP system for CNG kit businesses to manage renewals, customers, inventory, sales and service scheduling from one dashboard.",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            publisher: { "@id": `${SITE}/#organization` },
+        },
+        {
+            "@type": "Organization",
+            "@id": `${SITE}/#organization`,
+            name: "Dcodes Technologies",
+            url: SITE,
+            logo: `${SITE}/logo.png`,
+        },
+        {
+            "@type": "FAQPage",
+            mainEntity: faqs.map((item) => ({
+                "@type": "Question",
+                name: item.question,
+                acceptedAnswer: { "@type": "Answer", text: item.answer },
+            })),
+        },
+        {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+                { "@type": "ListItem", position: 2, name: "Smart CNG Kit Renewal & Management System", item: PAGE_URL },
+            ],
+        },
+    ],
+};
+
 // ============== HERO TITLE COMPONENT ==============
 const HeroTitle = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -175,7 +224,7 @@ const HeroTitle = () => {
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
             {/* SoftAurora Background - Purple */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0" aria-hidden="true">
                 <SoftAurora
                     speed={0.6}
                     scale={1.5}
@@ -195,7 +244,7 @@ const HeroTitle = () => {
             </div>
 
             {/* Soft fade for better text readability */}
-            <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
+            <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" aria-hidden="true" />
 
             {/* Content */}
             <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -220,10 +269,16 @@ const HeroTitle = () => {
                     
                     {/* CTA Buttons - Blue */}
                     <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                        <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-300 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm tracking-wide">
+                        <Link
+                            href="/connect"
+                            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-300 hover:scale-105 shadow-lg shadow-blue-500/25 text-sm tracking-wide"
+                        >
                             Get Started
-                        </button>
-                        <button className="px-8 py-3 bg-white/10 backdrop-blur-sm border border-white/20 hover:border-blue-400 text-white font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:bg-white/20 text-sm tracking-wide">
+                        </Link>
+                        <button
+                            type="button"
+                            className="px-8 py-3 bg-white/10 backdrop-blur-sm border border-white/20 hover:border-blue-400 text-white font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:bg-white/20 text-sm tracking-wide"
+                        >
                             Watch Demo
                         </button>
                     </div>
@@ -231,7 +286,7 @@ const HeroTitle = () => {
             </div>
 
             {/* Scroll Indicator */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce" aria-hidden="true">
                 <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
                     <div className="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse"></div>
                 </div>
@@ -266,14 +321,14 @@ const FeaturesSection = () => {
                     {/* Left Side - Feature List */}
                     <div className="lg:w-2/5">
                         <div className="relative">
-                            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-800 hidden lg:block">
+                            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-800 hidden lg:block" aria-hidden="true">
                                 <div
                                     className="absolute w-0.5 bg-gradient-to-b from-blue-500 to-cyan-400 transition-all duration-500"
                                     style={{ height: `${(activeFeature + 1) * (100 / features.length)}%`, top: '0' }}
                                 />
                             </div>
 
-                            <div className="lg:hidden mb-6">
+                            <div className="lg:hidden mb-6" aria-hidden="true">
                                 <div className="h-1 w-full bg-gray-800 rounded-full">
                                     <div
                                         className="h-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full transition-all duration-500"
@@ -285,7 +340,7 @@ const FeaturesSection = () => {
                             <div className="space-y-3">
                                 {features.map((feature, index) => (
                                     <div key={feature.id} className="relative">
-                                        <div className="hidden lg:flex absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
+                                        <div className="hidden lg:flex absolute left-0 top-1/2 transform -translate-y-1/2 z-10" aria-hidden="true">
                                             <div className={`
                                                 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300
                                                 ${activeFeature === index
@@ -313,7 +368,12 @@ const FeaturesSection = () => {
                                                 <h3 className={`text-base md:text-lg font-light tracking-wide transition-colors ${activeFeature === index ? 'text-blue-400' : 'text-white'}`}>
                                                     {feature.title}
                                                 </h3>
-                                                <button className="p-1 hover:bg-gray-800 rounded">
+                                                <button
+                                                    type="button"
+                                                    className="p-1 hover:bg-gray-800 rounded"
+                                                    aria-label={`Toggle ${feature.title} details`}
+                                                    aria-expanded={openDropdown === feature.id}
+                                                >
                                                     {openDropdown === feature.id ? (
                                                         <ChevronUp className="w-4 h-4 text-gray-400" />
                                                     ) : (
@@ -339,7 +399,7 @@ const FeaturesSection = () => {
                             <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
                                 <div className="relative h-64 md:h-80 lg:h-96 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 flex items-center justify-center">
                                     <div className="text-center p-8">
-                                        <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-blue-500 to-cyan-400/20 rounded-2xl flex items-center justify-center">
+                                        <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-blue-500 to-cyan-400/20 rounded-2xl flex items-center justify-center" aria-hidden="true">
                                             {features[activeFeature]?.icon}
                                         </div>
                                         <h3 className="text-lg font-light text-white mb-2 tracking-wide">{features[activeFeature]?.title}</h3>
@@ -353,7 +413,7 @@ const FeaturesSection = () => {
                                             <h4 className="text-lg font-light text-white tracking-wide">{features[activeFeature]?.title}</h4>
                                             <p className="text-gray-400 text-xs font-light">Module {activeFeature + 1} of {features.length}</p>
                                         </div>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-2" aria-hidden="true">
                                             {features.map((_, idx) => (
                                                 <div key={idx} className={`h-1 rounded-full transition-all ${activeFeature === idx ? 'w-5 bg-gradient-to-r from-blue-500 to-cyan-400' : 'w-2 bg-gray-700'}`} />
                                             ))}
@@ -364,14 +424,14 @@ const FeaturesSection = () => {
                             </div>
 
                             <div className="flex justify-between gap-3 mt-4 lg:hidden">
-                                <button onClick={() => {
+                                <button type="button" onClick={() => {
                                     const prev = activeFeature > 0 ? activeFeature - 1 : features.length - 1;
                                     setActiveFeature(prev);
                                     setOpenDropdown(features[prev].id);
                                 }} className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-light text-sm">
                                     ← Previous
                                 </button>
-                                <button onClick={() => {
+                                <button type="button" onClick={() => {
                                     const next = activeFeature < features.length - 1 ? activeFeature + 1 : 0;
                                     setActiveFeature(next);
                                     setOpenDropdown(features[next].id);
@@ -389,14 +449,14 @@ const FeaturesSection = () => {
 
 // ============== INTERACTIVE MODULES ==============
 const InteractiveModules = () => {
-    const [hoveredId, setHoveredId] = useState<number | null>(null);
+    const [, setHoveredId] = useState<number | null>(null);
 
     return (
         <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full mb-4">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" aria-hidden="true"></div>
                         <span className="text-blue-400 font-light text-sm tracking-wide">Customer-Focused Modules</span>
                     </div>
 
@@ -417,10 +477,10 @@ const InteractiveModules = () => {
                             onMouseLeave={() => setHoveredId(null)}
                             className="group relative"
                         >
-                            <div className={`absolute -inset-0.5 bg-gradient-to-r ${module.color} rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-500`}></div>
+                            <div className={`absolute -inset-0.5 bg-gradient-to-r ${module.color} rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-500`} aria-hidden="true"></div>
 
                             <div className="relative bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 transition-all duration-300 hover:border-gray-700 hover:translate-y-[-2px] h-full">
-                                <div className="relative mb-4">
+                                <div className="relative mb-4" aria-hidden="true">
                                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${module.color} flex items-center justify-center text-white mb-2 transition-transform duration-300 group-hover:scale-110`}>
                                         {module.icon}
                                     </div>
@@ -432,7 +492,7 @@ const InteractiveModules = () => {
 
                                 <p className="text-gray-400 text-sm font-light leading-relaxed">{module.description}</p>
 
-                                <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${module.color} rounded-b-2xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}></div>
+                                <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${module.color} rounded-b-2xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} aria-hidden="true"></div>
                             </div>
                         </div>
                     ))}
@@ -453,7 +513,7 @@ const CRMCard = () => {
                     <div className="space-y-6">
                         <div>
                             <div className="inline-flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full mb-4">
-                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" aria-hidden="true"></div>
                                 <span className="text-blue-400 font-light text-sm tracking-wide">Customer Relationship Management</span>
                             </div>
 
@@ -471,7 +531,7 @@ const CRMCard = () => {
                         <div className="space-y-3">
                             {crmFeatures.map((feature, index) => (
                                 <div key={index} className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-xl border border-gray-800 hover:border-blue-500/30 transition-all duration-300">
-                                    <div className="p-1.5 bg-blue-500/10 rounded-lg text-blue-400">{feature.icon}</div>
+                                    <div className="p-1.5 bg-blue-500/10 rounded-lg text-blue-400" aria-hidden="true">{feature.icon}</div>
                                     <span className="text-white font-light text-sm tracking-wide">{feature.text}</span>
                                 </div>
                             ))}
@@ -501,21 +561,21 @@ const CRMCard = () => {
                                     <h3 className="text-lg font-light text-white tracking-wide">Customer Dashboard</h3>
                                     <p className="text-gray-400 text-xs font-light">Real-time overview</p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2" aria-hidden="true">
                                     <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
                                     <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
                                     <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
                                 </div>
                             </div>
 
-                            <div className="space-y-3 mb-4">
+                            <div className="space-y-3 mb-4" aria-hidden="true">
                                 <div className="h-2 bg-gradient-to-r from-green-500 to-cyan-500 rounded-full w-3/4"></div>
                                 <div className="h-2 bg-gradient-to-r from-yellow-500 to-cyan-500 rounded-full w-5/6"></div>
                                 <div className="h-2 bg-gradient-to-r from-red-500 to-cyan-500 rounded-full w-1/2"></div>
                             </div>
 
                             <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                                <div className="text-3xl mb-1">📊</div>
+                                <div className="text-3xl mb-1" aria-hidden="true">📊</div>
                                 <p className="text-gray-400 text-xs font-light">Dashboard Preview</p>
                                 <p className="text-gray-500 text-[10px] font-light mt-1">Interactive charts and analytics</p>
                             </div>
@@ -542,7 +602,7 @@ const FAQSection = () => {
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-full mb-4">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" aria-hidden="true"></div>
                         <span className="text-blue-400 font-light text-sm tracking-wide">FAQ</span>
                     </div>
 
@@ -568,6 +628,7 @@ const FAQSection = () => {
                                 }`}
                             >
                                 <button
+                                    type="button"
                                     onClick={() => setOpenId(isOpen ? null : faq.id)}
                                     className="w-full flex items-center justify-between gap-4 p-5 text-left"
                                     aria-expanded={isOpen}
@@ -576,7 +637,7 @@ const FAQSection = () => {
                                     <h3 className={`text-base md:text-lg font-light tracking-wide transition-colors ${isOpen ? 'text-blue-400' : 'text-white'}`}>
                                         {faq.question}
                                     </h3>
-                                    <span className="shrink-0 p-1 hover:bg-gray-800 rounded">
+                                    <span className="shrink-0 p-1 hover:bg-gray-800 rounded" aria-hidden="true">
                                         {isOpen ? (
                                             <ChevronUp className="w-4 h-4 text-gray-400" />
                                         ) : (
@@ -604,71 +665,47 @@ const FAQSection = () => {
 
 // ============== MAIN CNG PAGE ==============
 export default function CNGPage() {
-    useEffect(() => {
-        document.title = "CNG Solutions | Energy & Gas Services | Dcodes Technologies";
-        
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (!metaDescription) {
-            metaDescription = document.createElement('meta');
-            metaDescription.setAttribute('name', 'description');
-            document.head.appendChild(metaDescription);
-        }
-        metaDescription.setAttribute('content', "Explore Dcodes Technologies' CNG solutions for clean energy, natural gas services, and sustainable fuel management. Innovative technology for the energy sector.");
-        
-        // Structured Data
-        const structuredData = {
-            "@context": "https://schema.org",
-            "@type": "Service",
-            "serviceType": "CNG Solutions",
-            "name": "CNG Solutions & Clean Energy Services",
-            "description": "Advanced compressed natural gas solutions for sustainable energy management",
-            "provider": {
-                "@type": "Organization",
-                "name": "Dcodes Technologies",
-                "url": "https://dcodes.com"
-            }
-        };
-        
-        let script = document.querySelector('#structured-data');
-        if (!script) {
-            script = document.createElement('script');
-            script.id = 'structured-data';
-            script.setAttribute('type', 'application/ld+json');
-            document.head.appendChild(script);
-        }
-        script.textContent = JSON.stringify(structuredData);
-
-        // FAQ Structured Data
-        const structuredDataFaq = {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": faqs.map((item) => ({
-                "@type": "Question",
-                "name": item.question,
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": item.answer
-                }
-            }))
-        };
-
-        let scriptFaq = document.querySelector('#structured-data-faq');
-        if (!scriptFaq) {
-            scriptFaq = document.createElement('script');
-            scriptFaq.id = 'structured-data-faq';
-            scriptFaq.setAttribute('type', 'application/ld+json');
-            document.head.appendChild(scriptFaq);
-        }
-        scriptFaq.textContent = JSON.stringify(structuredDataFaq);
-    }, []);
-
     return (
         <div className="min-h-screen bg-black">
-            <HeroTitle />
-            <FeaturesSection />
-            <InteractiveModules />
-            <CRMCard />
-            <FAQSection />
+            {/* ===== SEO: React 19 hoists these into <head> and they are server-rendered ===== */}
+            <title>{PAGE_TITLE}</title>
+            <meta name="description" content={PAGE_DESC} />
+            <meta
+                name="robots"
+                content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+            />
+            <link rel="canonical" href={PAGE_URL} />
+
+            <meta property="og:type" content="website" />
+            <meta property="og:url" content={PAGE_URL} />
+            <meta property="og:site_name" content="Dcodes Technologies" />
+            <meta property="og:title" content="Smart CNG Kit Renewal & Management System" />
+            <meta
+                property="og:description"
+                content="Manage CNG kit renewals, customers, inventory, sales and service from one dashboard."
+            />
+            <meta property="og:image" content={`${SITE}/og-cng.jpg`} />
+
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="Smart CNG Kit Renewal & Management System" />
+            <meta
+                name="twitter:description"
+                content="CRM and ERP for CNG kit businesses: renewals, customers, inventory, sales and service."
+            />
+            <meta name="twitter:image" content={`${SITE}/og-cng.jpg`} />
+
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
+            />
+
+            <main>
+                <HeroTitle />
+                <FeaturesSection />
+                <InteractiveModules />
+                <CRMCard />
+                <FAQSection />
+            </main>
         </div>
     );
 }
