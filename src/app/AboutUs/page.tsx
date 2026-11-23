@@ -245,26 +245,23 @@ const storyCards = [
   { src: "/story (2).jpeg", alt: "Ideation & Collaboration at Dcodes Technologies", title: "Ideation & Collaboration" },
 ];
 
-const teamMembers: { name: string; role: string; description: string; linkedin?: string; img?: string }[] = [
+const teamMembers: { name: string; role: string; description: string; linkedin?: string }[] = [
   {
     name: "Khushali Parikh",
     role: "Full Stack Developer",
     description: "Full stack developer specializing in the MERN stack, database management, and server-side programming.",
-    img: "/k.jpg",
   },
   {
     name: "Kunj Thakar",
     role: "Digital Marketer",
     description: "Creative digital marketer with skills in branding, social media campaigns, and content strategy.",
     linkedin: "https://www.linkedin.com/in/kunj-thakar-290756305/",
-    img: "/ku.jpg",
   },
   {
     name: "Milan Aaradeshna",
     role: "WordPress Developer",
     description: "Expert in WordPress development, including custom themes, plugin development, and website optimization.",
     linkedin: "https://www.linkedin.com/in/milan-aaradeshna-43157458/",
-    img: "/m.png",
   },
 ];
 
@@ -622,21 +619,23 @@ const AboutUsPage = () => {
                 key={m.name}
                 className="group border border-white/10 rounded-lg p-6 bg-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:border-white/30"
               >
-                <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-800 border border-white/10 mb-5 flex items-center justify-center">
-                  {m.img ? (
-                    <img
-                      src={m.img}
-                      alt={`${m.name} - ${m.role} at Dcodes Technologies`}
-                      width={96}
-                      height={96}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-2xl text-white/60" aria-hidden="true">
-                      {m.name.split(" ").map((p) => p[0]).join("")}
-                    </span>
-                  )}
+                {/* Vector avatar (replaces photo) */}
+                <div
+                  className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 mb-5 flex items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-12 h-12 text-blue-400 group-hover:text-blue-300 transition-colors duration-300"
+                  >
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" />
+                  </svg>
                 </div>
                 <h3 className="text-xl font-normal text-white group-hover:text-blue-400 transition-colors duration-300">{m.name}</h3>
                 <p className="text-blue-400 text-sm font-medium mb-3">{m.role}</p>

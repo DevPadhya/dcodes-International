@@ -1,15 +1,109 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { ChevronDown, Users, Calendar, Award, Building, Wifi, Shield, Monitor, Coffee, Trophy, MapPin, Heart, Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import WebThreads from '@/components/WebThreads';
+
+// ---------- Animation variants ----------
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+};
+
+const fadeIn: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+};
+
+const scaleIn: Variants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.7, ease: "easeOut" } },
+};
+
+const stagger: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+};
+
+const heroStagger: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.2, delayChildren: 0.2 } },
+};
+
+const lineGrow: Variants = {
+  hidden: { scaleX: 0 },
+  visible: { scaleX: 1, transition: { duration: 0.8 } },
+};
+
+// Reusable section wrapper: animates once when it scrolls into view
+const Reveal = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <motion.section
+    className={className}
+    variants={stagger}
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true, amount: 0.15 }}
+  >
+    {children}
+  </motion.section>
+);
+
+// ---------- Hero animated background (WebThreads) ----------
+const HeroBackground = () => (
+  <div
+    aria-hidden="true"
+    className="absolute top-0 left-0 w-full h-[700px] overflow-hidden pointer-events-none z-0"
+  >
+    <WebThreads
+      colors={["#5227FF", "#FF9FFC"]}
+      coreColor="#FFFFFF"
+      threadCount={6}
+      spread={0.18}
+      lightMode={false}
+      speed={0.2}
+      frequency={5}
+      taper={1}
+      position={0.5}
+      pinch={0.5}
+      nodes={1}
+      angle={0}
+      glow={0.02}
+      falloff={0.6}
+      thickness={1.1}
+      brightness={0.6}
+      opacity={1}
+      depth={0}
+      pulses={0}
+      mirror
+      shimmer={false}
+      fade={0}
+      grain={0.05}
+      intro
+      mouseInteraction
+      mouseStrength={0.5}
+      pulseOnClick
+      paused={false}
+    />
+
+    {/* Fade into the black page background */}
+    <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-black" />
+  </div>
+);
 
 const LifeAtDecodes = () => {
-  const [expandedSection, setExpandedSection] = useState(null);
+  const [expandedSection, setExpandedSection] = useState<number | null>(null);
+  const reduceMotion = useReducedMotion();
 
-  const toggleSection = (index) => {
+  const toggleSection = (index: number) => {
     setExpandedSection(expandedSection === index ? null : index);
   };
+
+  // Floating animation (disabled if user prefers reduced motion)
+  const floatAnim = reduceMotion
+    ? {}
+    : { y: [0, -10, 0], transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const } };
 
   // SEO Meta Tags - Adding dynamically with useEffect
   useEffect(() => {
@@ -406,59 +500,81 @@ const LifeAtDecodes = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Background Grid Pattern */}
+    <div className="relative min-h-screen bg-black text-white overflow-hidden">
+      {/* Hero animated background (WebThreads) */}
+      <HeroBackground />
+
+      {/* Background Grid Pattern (slowly drifting) */}
       <div className="fixed inset-0 opacity-5 pointer-events-none">
-        <div 
-          className="absolute inset-0" 
+        <motion.div
+          className="absolute inset-0"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
             backgroundSize: '40px 40px'
           }}
+          animate={reduceMotion ? undefined : { backgroundPosition: ['0px 0px', '40px 40px'] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
       </div>
 
       {/* Main Container */}
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-20">
         
         {/* Hero Section */}
-        <div className="mb-20 mt-10 text-center">
-          <div className="inline-block border border-white/10 rounded-full px-6 py-2 mb-8">
+        <motion.div
+          className="mb-20 mt-10 text-center"
+          variants={heroStagger}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            variants={fadeUp}
+            className="inline-block border border-white/10 rounded-full px-6 py-2 mb-8 bg-black/30 backdrop-blur-sm"
+          >
             <span className="text-sm font-normal tracking-wider uppercase">Life at</span>
-          </div>
+          </motion.div>
           
-          <h1 className="text-6xl md:text-8xl font-normal mb-8 tracking-tight">
+          <motion.h1 variants={fadeUp} className="text-6xl md:text-8xl font-normal mb-8 tracking-tight">
             Dcodes
             <span className="block font-extralight italic">Technologies</span>
-          </h1>
+          </motion.h1>
           
-          <p className="text-xl font-normal text-white/70 max-w-3xl mx-auto leading-relaxed">
+          <motion.p variants={fadeUp} className="text-xl font-normal text-white/70 max-w-3xl mx-auto leading-relaxed">
             A dynamic and lively place to work where we promote a culture of creativity, teamwork, and continuous learning. 
             Our team thrives in a well-balanced setting with stimulating activities that boost innovation and team spirit.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Culture & Events Section */}
-        <section className="mb-32">
-          <div className="mb-16">
+        <Reveal className="mb-32">
+          <motion.div variants={fadeUp} className="mb-16">
             <h2 className="text-4xl font-normal mb-4 tracking-wide">Life & Culture at Dcodes</h2>
-            <div className="w-16 h-px bg-white/20 mb-8"></div>
+            <motion.div className="w-16 h-px bg-white/20 mb-8 origin-left" variants={lineGrow} />
             <p className="text-lg text-white/70 max-w-3xl leading-relaxed">
               We believe that great work happens in a great environment. Our culture is built on collaboration, 
               innovation, and making work enjoyable through various events and activities.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {cultureEvents.map((event, index) => (
-              <div key={event.id} className="group cursor-pointer">
+              <motion.div
+                key={event.id}
+                variants={fadeUp}
+                whileHover={{ y: -8 }}
+                className="group cursor-pointer"
+              >
                 <div className="border border-white/10 rounded-xl bg-gray-900/20 backdrop-blur-sm hover:border-white/30 transition-all duration-500 overflow-hidden h-full">
                   <div className="h-48 bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
-                    <div className="text-4xl">
+                    <motion.div
+                      className="text-4xl"
+                      animate={floatAnim}
+                      whileHover={{ scale: 1.3, rotate: 8 }}
+                    >
                       {index === 0 && "🏰"}
                       {index === 1 && "🎨"}
                       {index === 2 && "🎉"}
-                    </div>
+                    </motion.div>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-normal mb-3 group-hover:text-blue-400 transition-colors duration-300">
@@ -469,29 +585,38 @@ const LifeAtDecodes = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* Infrastructure Section */}
-        <section className="mb-32">
-          <div className="mb-16">
+        <Reveal className="mb-32">
+          <motion.div variants={fadeUp} className="mb-16">
             <h2 className="text-4xl font-normal mb-4 tracking-wide">Our Infrastructure</h2>
-            <div className="w-16 h-px bg-white/20 mb-8"></div>
+            <motion.div className="w-16 h-px bg-white/20 mb-8 origin-left" variants={lineGrow} />
             <p className="text-lg text-white/70 max-w-3xl leading-relaxed">
               Cutting-edge infrastructure built for peak efficiency and innovation. Our workspace is equipped with 
               modern technologies and amenities that ensure strong and efficient project execution.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {infrastructure.map((item, index) => (
-              <div key={index} className="group cursor-default">
+              <motion.div
+                key={index}
+                variants={scaleIn}
+                whileHover={{ y: -6 }}
+                className="group cursor-default"
+              >
                 <div className="border border-white/10 rounded-xl p-6 bg-gray-900/20 backdrop-blur-sm hover:border-white/30 transition-all duration-500 h-full text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center border border-white/20 rounded-xl text-blue-400 group-hover:bg-blue-400/10 group-hover:border-blue-400 transition-all duration-300">
+                  <motion.div
+                    className="w-16 h-16 mx-auto mb-4 flex items-center justify-center border border-white/20 rounded-xl text-blue-400 group-hover:bg-blue-400/10 group-hover:border-blue-400 transition-all duration-300"
+                    whileHover={{ rotate: [0, -8, 8, 0], scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     {item.icon}
-                  </div>
+                  </motion.div>
                   <h3 className="text-lg font-normal mb-3 group-hover:text-white transition-colors duration-300">
                     {item.title}
                   </h3>
@@ -499,26 +624,34 @@ const LifeAtDecodes = () => {
                     {item.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* Perks & Benefits */}
-        <section className="mb-32">
-          <div className="mb-16">
+        <Reveal className="mb-32">
+          <motion.div variants={fadeUp} className="mb-16">
             <h2 className="text-4xl font-normal mb-4 tracking-wide">Perks of Working at Decodes</h2>
-            <div className="w-16 h-px bg-white/20 mb-8"></div>
-          </div>
+            <motion.div className="w-16 h-px bg-white/20 mb-8 origin-left" variants={lineGrow} />
+          </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {perks.map((perk, index) => (
-              <div key={index} className="group cursor-default">
+              <motion.div
+                key={index}
+                variants={fadeUp}
+                whileHover={{ y: -6 }}
+                className="group cursor-default"
+              >
                 <div className="border border-white/10 rounded-xl p-6 bg-gray-900/20 backdrop-blur-sm hover:border-white/30 transition-all duration-500 h-full">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center border border-white/20 rounded-xl text-blue-400 group-hover:bg-blue-400/10 group-hover:border-blue-400 transition-all duration-300">
+                    <motion.div
+                      className="w-12 h-12 flex items-center justify-center border border-white/20 rounded-xl text-blue-400 group-hover:bg-blue-400/10 group-hover:border-blue-400 transition-all duration-300"
+                      whileHover={{ rotate: 10, scale: 1.15 }}
+                    >
                       {perk.icon}
-                    </div>
+                    </motion.div>
                     <h3 className="text-lg font-normal group-hover:text-white transition-colors duration-300">
                       {perk.title}
                     </h3>
@@ -527,23 +660,37 @@ const LifeAtDecodes = () => {
                     {perk.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </Reveal>
                           
         {/* Team Values */}
-        <section className="mb-32">
-          <div className="mb-16">
+        <Reveal className="mb-32">
+          <motion.div variants={fadeUp} className="mb-16">
             <h2 className="text-4xl font-normal mb-4 tracking-wide">Our Team Values</h2>
-            <div className="w-16 h-px bg-white/20 mb-8"></div>
-          </div>           
+            <motion.div className="w-16 h-px bg-white/20 mb-8 origin-left" variants={lineGrow} />
+          </motion.div>           
                            
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {teamValues.map((value, index) => (
-              <div key={index} className="group cursor-default">
+              <motion.div
+                key={index}
+                variants={scaleIn}
+                whileHover={{ y: -6 }}
+                className="group cursor-default"
+              >
                 <div className="border border-white/10 rounded-xl p-6 bg-gray-900/20 backdrop-blur-sm hover:border-white/30 transition-all duration-500 h-full text-center">
-                  <div className="text-3xl mb-4">{value.icon}</div>
+                  <motion.div
+                    className="text-3xl mb-4 inline-block"
+                    animate={reduceMotion ? undefined : {
+                      y: [0, -8, 0],
+                      transition: { duration: 3 + index * 0.4, repeat: Infinity, ease: "easeInOut" },
+                    }}
+                    whileHover={{ scale: 1.3, rotate: 10 }}
+                  >
+                    {value.icon}
+                  </motion.div>
                   <h3 className="text-lg font-normal mb-3 group-hover:text-white transition-colors duration-300">
                     {value.title}
                   </h3>
@@ -551,74 +698,91 @@ const LifeAtDecodes = () => {
                     {value.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* Meet Our Team Section */}
-        <section className="mb-20">
-          <div className="border border-white/10 rounded-2xl p-12 bg-gray-900/20 backdrop-blur-sm">
+        <Reveal className="mb-20">
+          <motion.div
+            variants={scaleIn}
+            className="border border-white/10 rounded-2xl p-12 bg-gray-900/20 backdrop-blur-sm"
+          >
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-4xl font-normal mb-6 tracking-wide">Be Part of Our Team</h2>
-                <div className="w-16 h-px bg-white/20 mb-6"></div>
-                <p className="text-lg text-white/70 leading-relaxed mb-6">
+              <motion.div variants={stagger}>
+                <motion.h2 variants={fadeUp} className="text-4xl font-normal mb-6 tracking-wide">Be Part of Our Team</motion.h2>
+                <motion.div className="w-16 h-px bg-white/20 mb-6 origin-left" variants={lineGrow} />
+                <motion.p variants={fadeUp} className="text-lg text-white/70 leading-relaxed mb-6">
                   Our team at Dcodes Technologies is the foundation of our success. We are a group of fully committed 
                   professionals including ambitious developers, creative designers, smart campaign managers, and 
                   effective project leaders.
-                </p>
-                <p className="text-lg text-white/70 leading-relaxed mb-8">
+                </motion.p>
+                <motion.p variants={fadeUp} className="text-lg text-white/70 leading-relaxed mb-8">
                   Together, our specialized knowledge and unwavering dedication to quality work together to produce 
                   innovative, superior solutions. We create a friendly workplace that boosts creativity and efficiency 
                   by fostering a culture of ongoing learning and teamwork.
-                </p>
-                <Link 
-                  href="/careers" 
-                  className="inline-flex items-center gap-3 px-6 py-3 border border-white/10 rounded-lg bg-gray-800/30 hover:border-blue-400 hover:bg-blue-400/10 transition-all duration-300 group"
-                  aria-label="View open positions at Dcodes Technologies"
-                >
-                  <span className="font-medium text-gray-300 group-hover:text-white transition-colors duration-300">
-                    View Open Positions
-                  </span>
-                  <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors duration-300" />
-                </Link>
-              </div>
+                </motion.p>
+                <motion.div variants={fadeUp} className="inline-block" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                  <Link 
+                    href="/careers" 
+                    className="inline-flex items-center gap-3 px-6 py-3 border border-white/10 rounded-lg bg-gray-800/30 hover:border-blue-400 hover:bg-blue-400/10 transition-all duration-300 group"
+                    aria-label="View open positions at Dcodes Technologies"
+                  >
+                    <span className="font-medium text-gray-300 group-hover:text-white transition-colors duration-300">
+                      View Open Positions
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-300" />
+                  </Link>
+                </motion.div>
+              </motion.div>
               
-              <div className="flex justify-center">
-                <img 
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, x: 60 },
+                  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } },
+                }}
+                className="flex justify-center"
+              >
+                <motion.img 
                   src="/Team.png" 
                   alt="Our Team at Dcodes Technologies" 
                   className="rounded-xl border border-white/10 hover:border-white/20 transition-all duration-500 max-w-full h-auto"
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 />
-              </div>
+              </motion.div>
             </div>
-          </div>
-        </section>
+          </motion.div>
+        </Reveal>
 
         {/* CTA Section */}
-        <section className="text-center py-16">
-          <h2 className="text-4xl font-normal mb-6 tracking-wide">Ready to Join Our Team?</h2>
-          <p className="text-lg text-white/70 mb-8 max-w-2xl mx-auto">
+        <Reveal className="text-center py-16">
+          <motion.h2 variants={fadeUp} className="text-4xl font-normal mb-6 tracking-wide">Ready to Join Our Team?</motion.h2>
+          <motion.p variants={fadeUp} className="text-lg text-white/70 mb-8 max-w-2xl mx-auto">
             Be part of a team that's shaping the future of technology. Explore opportunities to grow, innovate, and make an impact.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/careers" 
-              className="bg-blue-600 text-white px-8 py-4 rounded-full hover:bg-blue-700 transition-all duration-300 font-medium text-lg"
-              aria-label="View current job openings at Dcodes Technologies"
-            >
-              View Current Openings
-            </Link>
-            <a 
+          </motion.p>
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link 
+                href="/careers" 
+                className="inline-block bg-blue-600 text-white px-8 py-4 rounded-full hover:bg-blue-700 transition-all duration-300 font-medium text-lg"
+                aria-label="View current job openings at Dcodes Technologies"
+              >
+                View Current Openings
+              </Link>
+            </motion.div>
+            <motion.a 
               href="mailto:hr@dcodestech.com" 
               className="border border-white/20 text-white px-8 py-4 rounded-full hover:bg-white/10 transition-all duration-300 font-medium text-lg inline-block text-center"
               aria-label="Contact HR department at Dcodes Technologies"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
             >
               Contact HR
-            </a>
-          </div>
-        </section>
+            </motion.a>
+          </motion.div>
+        </Reveal>
       </div>
     </div>
   );
