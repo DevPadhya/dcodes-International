@@ -23,7 +23,7 @@ const useMousePosition = () => {
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
 
   React.useEffect(() => {
-    const updateMousePosition = (e) => {
+    const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
@@ -37,7 +37,6 @@ const useMousePosition = () => {
 export function HeroSection() {
   const [isHovered, setIsHovered] = useState(false);
 
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -46,7 +45,7 @@ export function HeroSection() {
         staggerChildren: 0.2,
         delayChildren: 0.3,
         duration: 0.8,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number]
       }
     }
   };
@@ -58,7 +57,7 @@ export function HeroSection() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number]
       }
     }
   };
@@ -71,20 +70,16 @@ export function HeroSection() {
       rotateX: 0,
       transition: {
         duration: 1,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number]
       }
     }
   };
 
   const handleBookCall = () => {
-    // Add your booking logic here
     console.log('Booking a call...');
   };
 
-  const handleExploreServices = () => {
-    // Add your navigation logic here
-
-  };
+  const handleExploreServices = () => {};
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
@@ -100,8 +95,6 @@ export function HeroSection() {
           iterationsPoisson={32}
           resolution={0.5}
           isBounce={false}
-
-
           autoSpeed={0.5}
           autoIntensity={2.2}
           takeoverDuration={0.25}
@@ -119,7 +112,7 @@ export function HeroSection() {
             animate="visible"
           >
 
-            {/* Main Heading with sophisticated animations */}
+            {/* Main Heading - ONLY H1 on the page */}
             <div className="max-w-5xl space-y-8 sm:space-y-10">
               <div className="space-y-6 sm:space-y-8">
                 <div className="overflow-hidden">
@@ -199,13 +192,11 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* --- MODIFIED SECTION --- */}
-            {/* Wrapped buttons in a flex container */}
             <motion.div
               variants={itemVariants}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
             >
-              {/* Button 1: Book a call (Existing) */}
+              {/* Button 1: Book a call */}
               <Button
                 className="group relative h-14 px-10 sm:px-16 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium text-base sm:text-lg rounded-full transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/30 overflow-hidden"
                 onClick={handleBookCall}
@@ -268,7 +259,7 @@ export function HeroSection() {
                 />
               </Button>
 
-              {/* Button 2: Explore Services (New) */}
+              {/* Button 2: Explore Solutions */}
               <Link
                 href="/services/digitalMarketing"
                 className="h-14 px-10 sm:px-16 flex justify-center items-center bg-transparent border border-white/30 text-white/80 hover:bg-white/10 hover:text-white font-medium text-base sm:text-lg rounded-full transition-all duration-300"
@@ -277,7 +268,6 @@ export function HeroSection() {
                 Explore Solutions
               </Link>
             </motion.div>
-            {/* --- END OF MODIFIED SECTION --- */}
 
           </motion.div>
         </div>

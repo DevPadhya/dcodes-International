@@ -11,7 +11,7 @@ import ConnectUsForm from "@/components/landingPage/ConnectUsForm";
 import WorkProcessUI from "@/components/landingPage/WorkProcessUI";
 
 const SITE = "https://www.dcodestech.com";
-const PAGE_TITLE = "Custom Software, Web & Mobile App Development | Dcodes Technologies";
+const PAGE_TITLE = "Software, Web & Mobile App Development | Dcodes Technologies";
 const PAGE_DESC =
   "Dcodes Technologies builds custom software, websites, mobile apps and ERP systems for startups and growing businesses. Tell us about your project.";
 

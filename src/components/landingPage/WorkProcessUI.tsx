@@ -51,11 +51,11 @@ export default function WorkProcessUI() {
               Work Process
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-normal text-white mb-2">
+          <h2 className="text-4xl md:text-5xl font-normal text-white mb-2">
 How We Deliver 
             <span className="font-medium text-gray-300"> Exceptional </span>
               Results
-          </h1>
+          </h2>
           <div className="w-12 h-px bg-gray-500 mx-auto mt-6"></div>
         </div>
 
