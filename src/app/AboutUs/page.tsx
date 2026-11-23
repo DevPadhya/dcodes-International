@@ -389,15 +389,15 @@ const AboutUsPage = () => {
               Download Portfolio
             </a>
 
-            <a
-              href="/Dcodes Technologies Corporate Profile.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className='p-3 w-45 md:w-58 lg:w-70 bg-transparent text-white font-bold rounded-full border-2 border-gray-400 hover:border-white transition-all duration-300'
-              aria-label="View Dcodes Technologies portfolio in new tab"
-            >
-              View Portfolio
-            </a>
+      <a
+  href="https://portfolio.dcodestech.com/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="p-3 w-45 md:w-58 lg:w-70 bg-transparent text-white font-bold rounded-full border-2 border-gray-400 hover:border-white transition-all duration-300"
+  aria-label="View Dcodes Technologies portfolio in new tab"
+>
+  View Portfolio
+</a>
           </div>
         </header>
 
