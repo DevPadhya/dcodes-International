@@ -735,6 +735,7 @@ const AboutUsPage = () => {
         <section className="w-full py-16" aria-labelledby="story-heading">
           <h2 id="story-heading" className="text-4xl font-bold text-center mb-14 uppercase">Our Story</h2>
 
+
           <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 px-4">
             {storyCards.map((card) => (
               <div
