@@ -3,36 +3,36 @@ import { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 const securityHeaders = [
-  // MIME sniffing band
   { key: "X-Content-Type-Options", value: "nosniff" },
-  // Tamari site ne bija site ma iframe ma khulva thi roke che (clickjacking)
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
-  // Bija site par jata URL ni vigat ochhi shared thay
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  // Camera/location (QR scanner, map) mate (self) rakhyu che. Na vaparta ho to () kari do.
+  // Camera/location (QR scanner, map) mate (self). Na vaparta ho to () kari do.
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(self), payment=()" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  // same-origin-allow-popups: Firebase/Google login popup chalu rahe
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
 ];
 
-// CSP pehla "Report-Only" ma: kai block nathi karto, fakt browser Console ma warning aape che.
-// Console ma jaruri script/image block thati dekhay to ahi domain umero, pachi enforce karo.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "media-src 'self' https://videos.pexels.com",
-  "connect-src 'self' https:",
+  "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
+  "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
 
-  // images.domains deprecated che, etle remotePatterns
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "dcodestech.com" },
@@ -46,18 +46,16 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           ...securityHeaders,
-          { key: "Content-Security-Policy-Report-Only", value: csp },
+          { key: "Content-Security-Policy", value: csp },
         ],
       },
     ];
   },
 
-  // Ignore TypeScript errors during build
   typescript: {
     ignoreBuildErrors: true,
   },
 
-  // Ignore ESLint errors during build
   eslint: {
     ignoreDuringBuilds: true,
   },
