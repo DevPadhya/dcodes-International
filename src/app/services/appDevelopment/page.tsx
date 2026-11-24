@@ -53,6 +53,40 @@ const PORTFOLIO_URL = "https://portfolio.dcodestech.com/#Mobile";
 
 const safeJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
 
+// Fallback: if any <img> in the 'What We Deliver' cards is broken/missing, show a vector icon instead
+const DELIVER_ICON_CSS = `
+/* "What We Deliver" cards: broken images ni jagya e vector icons */
+img[alt^="build native" i],
+img[alt^="build scalable" i],
+img[alt^="build high" i] {
+  box-sizing: border-box;
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px;
+  padding: 10px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(37, 99, 235, 0.15));
+}
+
+/* native: phone */
+img[alt^="build native" i] {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none'%3E%3Crect x='13' y='4' width='22' height='40' rx='5' stroke='%2322d3ee' stroke-width='2.5'/%3E%3Crect x='17' y='14' width='14' height='5' rx='1.5' fill='%2322d3ee' opacity='.8'/%3E%3Crect x='17' y='22' width='6' height='6' rx='1.5' fill='%233b82f6' opacity='.5'/%3E%3Crect x='25' y='22' width='6' height='6' rx='1.5' fill='%2322d3ee' opacity='.4'/%3E%3Cpath d='M19 35l3.5 3.5L29 32' stroke='%2322d3ee' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* scalable: layers */
+img[alt^="build scalable" i] {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none'%3E%3Cpath d='M24 6l17 9-17 9-17-9z' stroke='%233b82f6' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cpath d='M7 24l17 9 17-9' stroke='%238b5cf6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' opacity='.8'/%3E%3Cpath d='M7 33l17 9 17-9' stroke='%238b5cf6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* high-performance: speedometer */
+img[alt^="build high" i] {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none'%3E%3Cpath d='M7 34a17 17 0 1 1 34 0' stroke='%238b5cf6' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M24 34l8-12' stroke='%23ec4899' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='34' r='3' fill='%238b5cf6'/%3E%3C/svg%3E");
+}
+`;
+
 const faqs = [
   {
     question: "Which platform should I choose for my app?",
@@ -121,125 +155,6 @@ const jsonLd = {
       ]
     }
   ]
-};
-
-// Vector illustrations for "What We Deliver" cards (no image files needed)
-const DeliverIllustration = ({ type }: { type: "native" | "cross" | "enterprise" }) => {
-  return (
-    <div
-      className="relative h-44 w-full rounded-xl overflow-hidden mb-6 border border-gray-800/40 bg-gradient-to-br from-gray-900/60 to-gray-800/20 flex items-center justify-center"
-      aria-hidden="true"
-    >
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-cyan-500/10 blur-3xl" />
-      <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-blue-500/10 blur-3xl" />
-
-      {type === "native" && (
-        <svg viewBox="0 0 240 140" className="relative h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="nat-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#22d3ee" />
-              <stop offset="100%" stopColor="#3b82f6" />
-            </linearGradient>
-          </defs>
-          {/* Phone body */}
-          <rect x="88" y="10" width="64" height="120" rx="12" fill="#0b1220" stroke="url(#nat-g)" strokeWidth="2" />
-          <rect x="108" y="15" width="24" height="4" rx="2" fill="#1f2937" />
-          {/* App header */}
-          <rect x="96" y="26" width="48" height="10" rx="3" fill="url(#nat-g)" opacity="0.8" />
-          {/* App tiles */}
-          <rect x="96" y="42" width="21" height="21" rx="5" fill="#22d3ee" opacity="0.25" />
-          <rect x="123" y="42" width="21" height="21" rx="5" fill="#3b82f6" opacity="0.25" />
-          <rect x="96" y="69" width="21" height="21" rx="5" fill="#8b5cf6" opacity="0.25" />
-          <rect x="123" y="69" width="21" height="21" rx="5" fill="#22d3ee" opacity="0.25" />
-          {/* List lines */}
-          <rect x="96" y="97" width="48" height="5" rx="2.5" fill="#374151" />
-          <rect x="96" y="107" width="34" height="5" rx="2.5" fill="#374151" />
-          {/* Home bar */}
-          <rect x="108" y="121" width="24" height="3" rx="1.5" fill="#4b5563" />
-          {/* Floating badges */}
-          <circle cx="60" cy="45" r="16" fill="#0b1220" stroke="#22d3ee" strokeWidth="1.5" />
-          <path d="M53 45l5 5 9-10" stroke="#22d3ee" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="184" cy="92" r="16" fill="#0b1220" stroke="#3b82f6" strokeWidth="1.5" />
-          <path d="M184 83l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#3b82f6" />
-          <path d="M76 55 Q82 70 88 75" stroke="#22d3ee" strokeWidth="1" fill="none" strokeDasharray="3 3" opacity="0.6" />
-          <path d="M152 85 Q160 90 168 92" stroke="#3b82f6" strokeWidth="1" fill="none" strokeDasharray="3 3" opacity="0.6" />
-        </svg>
-      )}
-
-      {type === "cross" && (
-        <svg viewBox="0 0 240 140" className="relative h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="cross-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#8b5cf6" />
-            </linearGradient>
-          </defs>
-          {/* Laptop screen */}
-          <rect x="28" y="32" width="112" height="72" rx="6" fill="#0b1220" stroke="url(#cross-g)" strokeWidth="2" />
-          <rect x="36" y="40" width="96" height="10" rx="3" fill="url(#cross-g)" opacity="0.7" />
-          <rect x="36" y="56" width="44" height="40" rx="5" fill="#3b82f6" opacity="0.22" />
-          <rect x="86" y="56" width="46" height="18" rx="5" fill="#8b5cf6" opacity="0.22" />
-          <rect x="86" y="78" width="46" height="18" rx="5" fill="#22d3ee" opacity="0.22" />
-          {/* Laptop base */}
-          <path d="M18 108h132l-8 8H26z" fill="#1f2937" stroke="#374151" strokeWidth="1" />
-          {/* Phone */}
-          <rect x="158" y="44" width="42" height="76" rx="9" fill="#0b1220" stroke="url(#cross-g)" strokeWidth="2" />
-          <rect x="168" y="49" width="22" height="3" rx="1.5" fill="#1f2937" />
-          <rect x="165" y="58" width="28" height="8" rx="2.5" fill="url(#cross-g)" opacity="0.7" />
-          <rect x="165" y="71" width="12" height="12" rx="3" fill="#3b82f6" opacity="0.25" />
-          <rect x="181" y="71" width="12" height="12" rx="3" fill="#8b5cf6" opacity="0.25" />
-          <rect x="165" y="87" width="28" height="4" rx="2" fill="#374151" />
-          <rect x="165" y="95" width="20" height="4" rx="2" fill="#374151" />
-          {/* Code badge */}
-          <circle cx="120" cy="16" r="14" fill="#0b1220" stroke="#8b5cf6" strokeWidth="1.5" />
-          <path d="M114 11l-5 5 5 5M126 11l5 5-5 5" stroke="#8b5cf6" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Sync lines */}
-          <path d="M134 22 Q165 20 178 40" stroke="#3b82f6" strokeWidth="1" fill="none" strokeDasharray="3 3" opacity="0.7" />
-          <path d="M106 22 Q80 22 76 36" stroke="#8b5cf6" strokeWidth="1" fill="none" strokeDasharray="3 3" opacity="0.7" />
-        </svg>
-      )}
-
-      {type === "enterprise" && (
-        <svg viewBox="0 0 240 140" className="relative h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="ent-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#8b5cf6" />
-              <stop offset="100%" stopColor="#ec4899" />
-            </linearGradient>
-          </defs>
-          {/* Connection lines */}
-          <path d="M52 40 L92 48" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" fill="none" />
-          <path d="M52 100 L92 90" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" fill="none" />
-          <path d="M148 48 L188 40" stroke="#ec4899" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" fill="none" />
-          <path d="M148 90 L188 100" stroke="#ec4899" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" fill="none" />
-          {/* Server stack */}
-          <rect x="90" y="28" width="60" height="24" rx="5" fill="#0b1220" stroke="url(#ent-g)" strokeWidth="2" />
-          <rect x="90" y="58" width="60" height="24" rx="5" fill="#0b1220" stroke="url(#ent-g)" strokeWidth="2" />
-          <rect x="90" y="88" width="60" height="24" rx="5" fill="#0b1220" stroke="url(#ent-g)" strokeWidth="2" />
-          <circle cx="102" cy="40" r="3" fill="#22d3ee" />
-          <circle cx="102" cy="70" r="3" fill="#22d3ee" />
-          <circle cx="102" cy="100" r="3" fill="#22d3ee" />
-          <rect x="112" y="38" width="30" height="4" rx="2" fill="#374151" />
-          <rect x="112" y="68" width="30" height="4" rx="2" fill="#374151" />
-          <rect x="112" y="98" width="30" height="4" rx="2" fill="#374151" />
-          {/* Left nodes (devices) */}
-          <rect x="24" y="26" width="28" height="28" rx="7" fill="#0b1220" stroke="#8b5cf6" strokeWidth="1.5" />
-          <rect x="32" y="34" width="12" height="12" rx="3" fill="#8b5cf6" opacity="0.4" />
-          <rect x="24" y="86" width="28" height="28" rx="7" fill="#0b1220" stroke="#8b5cf6" strokeWidth="1.5" />
-          <rect x="32" y="94" width="12" height="12" rx="3" fill="#8b5cf6" opacity="0.4" />
-          {/* Right: shield (security) */}
-          <circle cx="204" cy="40" r="16" fill="#0b1220" stroke="#ec4899" strokeWidth="1.5" />
-          <path d="M204 31l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10v-6z" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M200 40l3 3 5-6" stroke="#ec4899" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Right: chart (scale) */}
-          <rect x="188" y="84" width="32" height="32" rx="7" fill="#0b1220" stroke="#ec4899" strokeWidth="1.5" />
-          <rect x="194" y="102" width="4" height="8" rx="1" fill="#ec4899" opacity="0.8" />
-          <rect x="202" y="96" width="4" height="14" rx="1" fill="#ec4899" opacity="0.8" />
-          <rect x="210" y="90" width="4" height="20" rx="1" fill="#ec4899" opacity="0.8" />
-        </svg>
-      )}
-    </div>
-  );
 };
 
 // Tech Stack Logos Component
@@ -1100,6 +1015,8 @@ export default function EnhancedPremiumAppDev() {
         dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
       />
 
+      <style dangerouslySetInnerHTML={{ __html: DELIVER_ICON_CSS }} />
+
       {/* Animated Background Effects */}
       <div className="fixed inset-0 z-0" aria-hidden="true">
         <div style={{ height: "200vh", position: "relative", overflow: "hidden", right: "-300px" }}>
@@ -1111,80 +1028,6 @@ export default function EnhancedPremiumAppDev() {
 
       <main className="relative z-30">
         <UpdatedHero />
-
-        {/* What We Deliver Section */}
-        <motion.section
-          className="py-10 px-8 border-t border-gray-800/50"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-        >
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              className="text-center mb-20"
-              initial={{ y: 50, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-5xl font-extralight mb-6 tracking-tight">What We Deliver</h2>
-              <p className="text-xl text-gray-400 max-w-2xl mx-auto font-normal">
-                We help businesses turn bold app ideas into scalable digital products that users love. Our mobile development services span across platforms, technologies, and industries.
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <Card className="p-8 bg-gradient-to-br from-gray-900/30 to-gray-800/20 border-gray-800/30 h-full">
-                  <DeliverIllustration type="native" />
-                  <h3 className="text-2xl font-normal mb-4 text-white">Native iOS & Android</h3>
-                  <p className="text-gray-400 font-normal leading-relaxed">
-                    Deliver seamless performance with fully native Android and iOS apps.
-                    Built for speed, UX precision, and device-native integration.
-                  </p>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <Card className="p-8 bg-gradient-to-br from-gray-900/30 to-gray-800/20 border-gray-800/30 h-full">
-                  <DeliverIllustration type="cross" />
-                  <h3 className="text-2xl font-normal mb-4 text-white">Cross-Platform</h3>
-                  <p className="text-gray-400 font-normal leading-relaxed">
-                    Launch faster with Flutter and React Native apps. Code once, run anywhere —
-                    without compromising user experience or functionality.
-                  </p>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <Card className="p-8 bg-gradient-to-br from-gray-900/30 to-gray-800/20 border-gray-800/30 h-full">
-                  <DeliverIllustration type="enterprise" />
-                  <h3 className="text-2xl font-normal mb-4 text-white">Enterprise Solutions</h3>
-                  <p className="text-gray-400 font-normal leading-relaxed">
-                    Power high-traffic ecosystems with secure, cloud-connected apps optimized
-                    for large-scale deployments and business-critical operations.
-                  </p>
-                </Card>
-              </motion.div>
-            </div>
-          </div>
-        </motion.section>
 
         <IndustryUseCases />
         <TechStack />
@@ -1505,7 +1348,7 @@ export default function EnhancedPremiumAppDev() {
                 >
                   <div className="mb-8" aria-hidden="true">
                     <motion.div
-                      className="w-px h-16 bg-gradient-to-b from-cyan-400 to-blue-500 mx-auto group-hover:from-cyan-300 group-hover:to-blue-400 transition-colors duration-500"
+                      className="block w-[2px] min-w-[2px] h-16 rounded-full bg-gradient-to-b from-cyan-400 to-blue-500 mx-auto shadow-[0_0_8px_rgba(34,211,238,0.5)] group-hover:from-cyan-300 group-hover:to-blue-400 transition-colors duration-500"
                       whileHover={{ scaleY: 1.2 }}
                     />
                   </div>
