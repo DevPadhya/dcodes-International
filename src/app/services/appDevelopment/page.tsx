@@ -157,62 +157,6 @@ const jsonLd = {
   ]
 };
 
-// Small vector icons for the "What We Deliver" cards (replaces the missing image)
-const DeliverIcon = ({ type }: { type: "native" | "scalable" | "performance" }) => {
-  return (
-    <div
-      className="relative flex-shrink-0 w-14 h-14 rounded-xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/15 to-blue-600/15 flex items-center justify-center"
-      aria-hidden="true"
-    >
-      {type === "native" && (
-        <svg viewBox="0 0 48 48" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="di-nat" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#22d3ee" />
-              <stop offset="100%" stopColor="#3b82f6" />
-            </linearGradient>
-          </defs>
-          <rect x="13" y="4" width="22" height="40" rx="5" stroke="url(#di-nat)" strokeWidth="2.5" />
-          <rect x="20" y="7.5" width="8" height="2" rx="1" fill="#22d3ee" opacity="0.7" />
-          <rect x="17" y="14" width="14" height="5" rx="1.5" fill="url(#di-nat)" opacity="0.8" />
-          <rect x="17" y="22" width="6" height="6" rx="1.5" fill="#22d3ee" opacity="0.4" />
-          <rect x="25" y="22" width="6" height="6" rx="1.5" fill="#3b82f6" opacity="0.4" />
-          <path d="M19 35l3.5 3.5L29 32" stroke="#22d3ee" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )}
-
-      {type === "scalable" && (
-        <svg viewBox="0 0 48 48" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="di-sca" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#8b5cf6" />
-            </linearGradient>
-          </defs>
-          <path d="M24 6l17 9-17 9-17-9z" stroke="url(#di-sca)" strokeWidth="2.5" strokeLinejoin="round" />
-          <path d="M7 24l17 9 17-9" stroke="url(#di-sca)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
-          <path d="M7 33l17 9 17-9" stroke="url(#di-sca)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-        </svg>
-      )}
-
-      {type === "performance" && (
-        <svg viewBox="0 0 48 48" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="di-per" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#8b5cf6" />
-              <stop offset="100%" stopColor="#ec4899" />
-            </linearGradient>
-          </defs>
-          <path d="M7 34a17 17 0 1 1 34 0" stroke="url(#di-per)" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M24 34l8-12" stroke="#ec4899" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="24" cy="34" r="3" fill="#8b5cf6" />
-          <path d="M12 24l2 1.2M24 12v2.6M36 24l-2 1.2" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-        </svg>
-      )}
-    </div>
-  );
-};
-
 // Tech Stack Logos Component
 const TechStack = () => {
   const techStack = [
@@ -1084,72 +1028,6 @@ export default function EnhancedPremiumAppDev() {
 
       <main className="relative z-30">
         <UpdatedHero />
-
-        {/* What We Deliver Section */}
-        <motion.section
-          className="py-10 px-8 border-t border-gray-800/50"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          viewport={{ once: true }}
-        >
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              className="text-center mb-20"
-              initial={{ y: 50, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-5xl font-extralight mb-6 tracking-tight">What We Deliver</h2>
-              <p className="text-xl text-gray-400 max-w-2xl mx-auto font-normal">
-                We help businesses turn bold app ideas into scalable digital products that users love. Our mobile development services span across platforms, technologies, and industries.
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  type: "native" as const,
-                  title: "build native-feeling apps",
-                  subtitle: "React Native — iOS & Android",
-                  text: "Build native-feeling apps with React Native for Android and iOS. We deliver cross-platform performance, SEO-friendly web integrations, and the best UX/UI designs."
-                },
-                {
-                  type: "scalable" as const,
-                  title: "build scalable apps",
-                  subtitle: "highly scalable apps",
-                  text: "Launch faster with Flutter and React Native apps. Code once, run anywhere without compromising user experience or functionality."
-                },
-                {
-                  type: "performance" as const,
-                  title: "build high-performance apps",
-                  subtitle: "best performance apps",
-                  text: "Power high-traffic ecosystems with secure, cloud-connected apps optimized for large-scale deployments and business-critical operations."
-                }
-              ].map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.2, duration: 0.6 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className="p-6 rounded-2xl bg-gradient-to-br from-indigo-950/50 to-slate-900/60 border-indigo-900/40 h-full">
-                    <div className="flex items-start gap-4 mb-5">
-                      <DeliverIcon type={item.type} />
-                      <div>
-                        <h3 className="text-xl font-medium text-white leading-snug">{item.title}</h3>
-                        <p className="text-sm text-gray-400 mt-1">{item.subtitle}</p>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 font-normal leading-relaxed">{item.text}</p>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </motion.section>
 
         <IndustryUseCases />
         <TechStack />
